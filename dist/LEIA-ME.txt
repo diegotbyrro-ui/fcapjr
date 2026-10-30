@@ -1,0 +1,6 @@
+FCAP JR. — Site atualizado
+
+Abra index.html para visualizar o site.
+Para hospedar, envie index.html, style.css, app.js, booking.js e a pasta assets juntos.
+
+O agendamento utiliza dez dias úteis e cinco horários, com os dados em uma segunda etapa. A solicitação é enviada pelo WhatsApp para confirmação da equipe. O CRM ainda não está integrado.
