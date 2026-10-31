@@ -1,0 +1,9 @@
+# A função pública valida Turnstile e origem; callback Google valida state único.
+[functions.fcap-public-lead]
+verify_jwt = false
+[functions.fcap-ai]
+verify_jwt = true
+[functions.fcap-calendar]
+verify_jwt = false
+[functions.fcap-notify]
+verify_jwt = false

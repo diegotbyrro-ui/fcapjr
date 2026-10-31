@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Entrar na gestão | FCAP Jr.</title>
+  <link rel="icon" href="../assets/favicon-official.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="story" aria-label="Área administrativa da FCAP Jr.">
+      <div class="brand"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."><span>Painel de gestão</span></div>
+      <div class="story-bottom"><span class="kicker">AMBIENTE INTERNO</span><h2>Um espaço de trabalho para quem faz acontecer.</h2><p>Projetos, contatos, tarefas e oportunidades conectados ao time.</p></div>
+      <span class="copyright">FCAP Jr. · Acesso restrito</span>
+    </aside>
+    <main class="login-area">
+      <div class="mobile-brand"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."><span>Painel de gestão</span></div>
+      <section class="login-panel" aria-labelledby="login-title">
+        <p class="kicker">BEM-VINDO DE VOLTA</p>
+        <h1 id="login-title">Acesse sua conta</h1>
+        <p class="description">Entre com as credenciais fornecidas pela FCAP Jr. para acessar o sistema de gestão.</p>
+        <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+        <form id="login-form" autocomplete="on">
+          <label for="email">E-mail corporativo</label>
+          <input id="email" type="email" name="email" autocomplete="username" placeholder="seuemail@empresa.com.br" maxlength="254" required>
+          <label for="password">Senha</label>
+          <div class="password-wrap"><input id="password" type="password" name="password" autocomplete="current-password" placeholder="Digite sua senha" required><button type="button" id="toggle-password" aria-pressed="false" aria-label="Mostrar senha">Mostrar</button></div>
+          <button id="submit" class="submit" type="submit" disabled>Entrar no painel</button>
+        </form>
+        <p class="help">Não tem acesso? Solicite seu cadastro ao administrador.</p>
+      </section>
+      <a class="back" href="../index.html">Voltar ao site institucional</a>
+    </main>
+  </div>
+  <script src="../fcap-config.js"></script>
+  <script type="module" src="login.js"></script>
+</body>
+</html>
