@@ -174,3 +174,37 @@ label{font-size:12px;color:#4f6178;font-weight:800}
 .avatar.secretary-avatar-placeholder{background:#eef3ff;color:#2c5fd0;font-size:18px;font-weight:800}
 @media(max-width:1080px){.topbar h1{font-size:28px}}
 @media(max-width:760px){.profile-chip{display:none}.topbar{padding:18px}.topbar h1{font-size:24px}.content{padding:18px 18px 62px}.panel,.card,.calendar-sync-card{border-radius:18px}}
+
+/* FCAP Jr. R16 - Dashboard gerencial e contatos autorizados da Secretária */
+.dash-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.dash-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:16px 0 18px}
+.dash-kpi{min-height:132px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.dash-kpi strong{font-size:clamp(24px,2.3vw,32px);letter-spacing:-.04em;overflow-wrap:anywhere}
+.dash-kpi small{font-size:11px;color:var(--ap-muted);line-height:1.5}
+.dash-top-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.dash-top-grid .panel{min-width:0}
+.dash-bar-item{padding:8px 0 12px;border-bottom:1px solid var(--ap-border)}
+.dash-bar-head{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--ap-text-soft)}
+.dash-bar-head b{color:var(--ap-text);white-space:nowrap}
+.dash-bar-head small{font-size:10px;color:var(--ap-muted)}
+.dash-bar-track{background:var(--ap-border);height:8px;border-radius:20px;margin:10px 0 6px;overflow:hidden}
+.dash-bar-track i{display:block;height:100%;background:var(--ap-blue);border-radius:20px;min-width:0}
+.dash-team-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--ap-border)}
+.dash-team-row strong,.dash-team-row small{display:block}.dash-team-row strong{font-size:13px}.dash-team-row small{font-size:11px;color:var(--ap-text-soft)}
+.dash-team-stats{display:grid;grid-template-columns:35px 45px 35px 45px;gap:5px;align-items:baseline;text-align:right;font-size:11px;color:var(--ap-muted)}
+.dash-team-stats b{font-size:17px;color:var(--ap-text)}
+.dash-activity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.dash-activity-grid>div{background:var(--ap-surface-2);border:1px solid var(--ap-border);border-radius:10px;padding:15px}
+.dash-activity-grid b{display:block;font-size:24px;color:var(--ap-text);margin-bottom:7px}
+.dash-activity-grid small{display:block;font-size:11px;line-height:1.4;color:var(--ap-text-soft)}
+.dash-disclaimer{font-size:11px;line-height:1.7;color:var(--ap-muted);margin:22px 0}
+.dash-contacts{margin-bottom:18px}.dash-contacts .section-heading{align-items:flex-start;gap:15px}.dash-contacts .section-heading>div{max-width:720px}
+.dash-contacts .section-heading h2{margin:4px 0 8px}.dash-contacts .section-heading p{line-height:1.6}
+.dash-contact-metrics{display:flex;gap:20px;flex-wrap:wrap;padding:15px 0;margin:12px 0;border-block:1px solid var(--ap-border);font-size:12px;color:var(--ap-text-soft)}
+.dash-contact-metrics b{font-size:17px;color:var(--ap-text)}
+.dash-contact-table{min-width:850px}.dash-contact-table td{font-size:12px}
+.dash-check{display:flex;gap:10px;align-items:flex-start;font-size:13px;font-weight:600;line-height:1.6;margin:12px 0;color:var(--ap-text-soft)}
+.dash-check input{width:18px;height:18px;min-height:auto;flex:none;accent-color:var(--ap-blue);margin:2px 0 0}
+@media(max-width:1160px){.dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.dash-top-grid{grid-template-columns:1fr}.dash-contacts .section-heading{display:block}.dash-contacts .section-heading .btn{margin-top:12px}}
+@media(max-width:520px){.dash-kpis{grid-template-columns:1fr 1fr;gap:9px}.dash-kpi{min-height:112px;padding:13px}.dash-kpi strong{font-size:22px}.dash-activity-grid{grid-template-columns:1fr 1fr}.dash-actions{width:100%}.dash-actions .btn{flex:1 1 auto}.dash-team-row{align-items:flex-start;flex-direction:column}}
