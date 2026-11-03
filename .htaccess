@@ -1,0 +1,20 @@
+# FCAP Jr. - Hostinger Git deploy: files are inside dist/
+# Serve the site and the CRM on domain-root URLs without moving any source files.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Git deployment also contains source code; keep it outside the public website.
+RewriteRule ^(supabase|tests|\.openai|\.git)(/|$) - [F,L,NC]
+RewriteRule ^(CRM_CONTEXTO\.md|FCAP_CRM_IMPLANTACAO\.md|README\.md|\.gitignore)$ - [F,L,NC]
+
+# The website index is inside the dist directory.
+RewriteRule ^$ dist/index.html [L]
+
+# Do not rewrite a URL that already refers to dist.
+RewriteRule ^dist(/|$) - [L]
+
+# Resolve /gestao/, /gestao/login.html, /assets/, and other HTML pages.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ dist/$1 [L]
+</IfModule>
