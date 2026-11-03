@@ -5,34 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="referrer" content="no-referrer">
-  <title>Entrar na gestão | FCAP Jr.</title>
+  <meta name="theme-color" content="#0d1930">
+  <title>Central de Gestão | FCAP Jr.</title>
   <link rel="icon" href="../assets/favicon-official.svg" type="image/svg+xml">
   <link rel="stylesheet" href="login.css">
 </head>
 <body>
   <div class="layout">
-    <aside class="story" aria-label="Área administrativa da FCAP Jr.">
-      <div class="brand"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."><span>Painel de gestão</span></div>
-      <div class="story-bottom"><span class="kicker">AMBIENTE INTERNO</span><h2>Um espaço de trabalho para quem faz acontecer.</h2><p>Projetos, contatos, tarefas e oportunidades conectados ao time.</p></div>
-      <span class="copyright">FCAP Jr. · Acesso restrito</span>
+    <aside class="story" aria-label="Central de gestão da FCAP Jr.">
+      <div class="story-ambient" aria-hidden="true"></div>
+      <div class="brand">
+        <span class="brand-mark"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."></span>
+        <span class="brand-copy"><strong>FCAP Jr.</strong><small>CENTRAL DE GESTÃO</small></span>
+      </div>
+      <div class="story-content">
+        <div class="story-label"><span class="pulse" aria-hidden="true"></span> PLATAFORMA INTERNA</div>
+        <h2>Onde estratégia<br>vira <span>resultado.</span></h2>
+        <p>Uma central para organizar oportunidades, acompanhar projetos e manter o time conectado.</p>
+        <div class="story-divider"></div>
+        <div class="story-features" aria-label="Recursos da plataforma">
+          <div><span class="feature-symbol" aria-hidden="true">01</span> Gestão comercial e oportunidades</div>
+          <div><span class="feature-symbol" aria-hidden="true">02</span> Equipe, tarefas e agenda</div>
+          <div><span class="feature-symbol" aria-hidden="true">03</span> Informações para decidir melhor</div>
+        </div>
+      </div>
+      <div class="story-footer"><span>FCAP Jr. <span aria-hidden="true">·</span> Consultoria empresarial</span><span>ACESSO RESTRITO</span></div>
     </aside>
+
     <main class="login-area">
-      <div class="mobile-brand"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."><span>Painel de gestão</span></div>
+      <header class="login-top">
+        <div class="mobile-brand"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."><span>Central de Gestão</span></div>
+        <a class="back" href="../index.html"><span aria-hidden="true">←</span> Voltar ao site</a>
+      </header>
       <section class="login-panel" aria-labelledby="login-title">
-        <p class="kicker">BEM-VINDO DE VOLTA</p>
-        <h1 id="login-title">Acesse sua conta</h1>
-        <p class="description">Entre com as credenciais fornecidas pela FCAP Jr. para acessar o sistema de gestão.</p>
+        <div class="login-eyebrow"><span class="eyebrow-bar" aria-hidden="true"></span> ACESSO DA EQUIPE</div>
+        <h1 id="login-title">Bem-vindo de volta<span class="title-point">.</span></h1>
+        <p class="description">Entre com seu e-mail e senha para acessar a Central de Gestão da FCAP Jr.</p>
         <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+
         <form id="login-form" autocomplete="on">
-          <label for="email">E-mail corporativo</label>
-          <input id="email" type="email" name="email" autocomplete="username" placeholder="seuemail@empresa.com.br" maxlength="254" required>
-          <label for="password">Senha</label>
-          <div class="password-wrap"><input id="password" type="password" name="password" autocomplete="current-password" placeholder="Digite sua senha" required><button type="button" id="toggle-password" aria-pressed="false" aria-label="Mostrar senha">Mostrar</button></div>
+          <div class="field">
+            <label for="email">E-mail corporativo</label>
+            <input id="email" type="email" name="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="nome@empresa.com.br" maxlength="254" required>
+          </div>
+          <div class="field">
+            <label for="password">Senha</label>
+            <div class="password-wrap"><input id="password" type="password" name="password" autocomplete="current-password" placeholder="Sua senha de acesso" required><button type="button" id="toggle-password" aria-pressed="false" aria-label="Mostrar senha">Mostrar</button></div>
+          </div>
           <button id="submit" class="submit" type="submit" disabled>Entrar no painel</button>
         </form>
-        <p class="help">Não tem acesso? Solicite seu cadastro ao administrador.</p>
+        <div class="login-support"><span class="support-icon" aria-hidden="true">i</span><p>Este espaço é exclusivo para integrantes autorizados da FCAP Jr. Se você precisa de acesso, fale com o administrador.</p></div>
       </section>
-      <a class="back" href="../index.html">Voltar ao site institucional</a>
+      <footer class="login-bottom"><span>© FCAP Jr. 2026</span><span>Acesso restrito à equipe</span></footer>
     </main>
   </div>
   <script src="../fcap-config.js"></script>
