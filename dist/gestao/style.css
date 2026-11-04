@@ -266,3 +266,73 @@ label{font-size:12px;color:#4f6178;font-weight:800}
 @media(max-width:1280px){.r18-opportunity-columns{grid-template-columns:minmax(340px,1fr) minmax(340px,1fr)}.r18-opportunity-queue{display:none}}
 @media(max-width:850px){.r18-opportunity-columns{display:block;overflow:auto}.r18-opportunity-details,.r18-opportunity-chat{overflow:visible}.r18-opportunity-chat{min-height:400px}.r18-opportunity-messages{max-height:460px}.r18-agenda-bottom{grid-template-columns:1fr}.r18-demo-article-grid,.r18-demo-staff-grid{grid-template-columns:1fr 1fr}.r18-calendar-headline{align-items:flex-start}}
 @media(max-width:600px){.r18-calendar-headline,.r18-calendar-toolbar,.r18-calendar-tools{align-items:flex-start;flex-direction:column}.r18-calendar-nav{flex-wrap:wrap}.r18-calendar-nav strong{width:100%;margin:7px 0}.r18-demo-article-grid,.r18-demo-staff-grid{grid-template-columns:1fr}.r18-opportunity-details .grid2{grid-template-columns:1fr}.r18-demo-banner{flex-wrap:wrap}.r18-calendar-top{padding:16px}}
+
+
+/* ==============================================================
+  FCAP JR R19 - Ajustes estruturais: pipeline, ficha e blog.
+  Escopo visual; nao altera integracoes, dados, roles nem eventos.
+  =============================================================== */
+/* Quadro com altura guiada pelo conteudo, evitando scrolls verticais aninhados. */
+.content:has(.kanban){padding-bottom:24px}
+.kanban{align-items:flex-start;gap:12px;padding:4px 2px 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.kanban>.column{flex:0 0 clamp(252px,22vw,312px);width:clamp(252px,22vw,312px);min-width:252px;max-width:312px;min-height:0;max-height:none;height:auto;display:flex;flex-direction:column;overflow:hidden;border-radius:12px}
+.kanban .column-head{padding:12px 12px 8px}
+.kanban .column-meta{padding:0 12px 10px}
+.kanban .column-cards{min-height:0;max-height:none;flex:none;overflow:visible;padding:10px 10px 2px}
+.kanban .column-footer{padding:9px 12px;margin-top:4px}
+.kanban .leadcard{padding:12px;border-radius:10px;margin:0 0 9px;box-shadow:0 2px 8px rgba(15,23,42,.04);min-width:0}
+.kanban .leadcard>strong{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.kanban .leadcard>p{font-size:11px;margin:5px 0;overflow-wrap:anywhere}
+.kanban .leadcard>small{font-size:10px;line-height:1.45;display:block;overflow-wrap:anywhere}
+.kanban .leadcard-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:0;margin-top:10px}
+.kanban .leadcard-actions>.btn{display:inline-flex;align-items:center;justify-content:center;min-width:0;max-width:none;width:100%;height:34px;min-height:34px;padding:6px 5px;font-size:11px;line-height:1.15;white-space:nowrap;box-shadow:none}
+.kanban .lead-stage-quick{grid-column:1/-1;width:100%;max-width:100%;min-height:32px;font-size:11px}
+.pipeline-topbar{padding:17px 20px}
+.pipeline-topbar h2{margin-bottom:5px}
+.pipeline-hint{padding-top:4px;margin-bottom:8px}
+/* Modal por abas: dados completos e conversa, sem colunas cortadas. */
+.modalback .modal.r19-lead-modal{width:min(1080px,calc(100vw - 28px));max-width:none;height:min(840px,calc(100dvh - 34px));max-height:calc(100dvh - 34px);padding:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--ap-border);border-radius:14px}
+.r19-lead-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex:none;padding:18px 22px 15px;border-bottom:1px solid var(--ap-border)}
+.r19-lead-head h2{font-size:20px;margin:5px 0;overflow-wrap:anywhere}
+.r19-lead-head small{font-size:12px;color:var(--ap-text-soft)}
+.r19-lead-head .btn{flex:none;white-space:nowrap}
+.r19-tab-radio{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.r19-lead-tabs{display:flex;align-items:center;flex:none;gap:4px;padding:0 20px;border-bottom:1px solid var(--ap-border);background:var(--ap-surface)}
+.r19-lead-tabs label{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 18px;border:0;border-bottom:3px solid transparent;color:var(--ap-text-soft);font-weight:750;font-size:13px;cursor:pointer;transition:color .15s}
+.r19-lead-tabs label:hover{color:var(--ap-blue)}
+#r19-tab-data:focus-visible~.r19-lead-tabs label[for="r19-tab-data"],#r19-tab-chat:focus-visible~.r19-lead-tabs label[for="r19-tab-chat"]{outline:2px solid var(--ap-blue);outline-offset:-2px}
+#r19-tab-data:checked~.r19-lead-tabs label[for="r19-tab-data"],#r19-tab-chat:checked~.r19-lead-tabs label[for="r19-tab-chat"]{border-bottom-color:var(--ap-blue);color:var(--ap-blue)}
+.r19-lead-pane{min-height:0;min-width:0;flex:1;display:none}
+#r19-tab-data:checked~.r19-lead-data{display:block;overflow-y:auto;overscroll-behavior:contain;padding:20px 24px}
+.r19-lead-data>#lead-form,.r19-lead-data>.lead-analysis,.r19-lead-data>.lead-history{max-width:960px;margin-left:auto;margin-right:auto}
+.r19-lead-data .grid2{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.r19-lead-data label{min-width:0}
+.r19-lead-data input,.r19-lead-data select,.r19-lead-data textarea{min-width:0;max-width:100%}
+.r19-lead-data .lead-history{padding-bottom:18px}
+#r19-tab-chat:checked~.r19-lead-chat{display:flex;flex-direction:column}
+.r19-lead-chat-head{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:20px 24px;border-bottom:1px solid var(--ap-border)}
+.r19-lead-chat-head h3{margin:5px 0;font-size:19px}
+.r19-lead-chat-head p{font-size:12px;color:var(--ap-text-soft);margin:4px 0}
+.r19-lead-chat-messages{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;background:var(--ap-surface-2);padding:20px 24px}
+.r19-lead-chat-foot{border-top:1px solid var(--ap-border);padding:15px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.r19-lead-chat-foot span{font-size:12px;color:var(--ap-text-soft)}
+.r19-lead-chat-foot .btn{flex:none}
+/* Caixa WhatsApp com listas e chat proporcionais e alinhados. */
+.r17-wa-layout{grid-template-columns:minmax(220px,290px) minmax(320px,1fr) minmax(215px,275px);gap:12px;align-items:stretch}
+.r17-wa-layout>.panel{border-radius:12px}
+.r17-wa-list-inner{max-height:min(70dvh,650px)}
+.r17-wa-chat-body{max-height:min(66dvh,640px)}
+/* Blog: o agrupador demo ocupa TODA a largura do grid pai. */
+.article-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:14px;margin-top:16px}
+.article-grid>.r18-demo-article-grid{grid-column:1/-1;width:100%;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.article-grid .article-tile{min-width:0;height:100%;min-height:240px;padding:20px;border-radius:12px;display:flex;flex-direction:column;overflow-wrap:anywhere}
+.article-grid .article-tile h3{font-size:15px;line-height:1.4;margin:14px 0 10px}
+.article-grid .article-tile p{font-size:12px;line-height:1.65;margin:6px 0}
+.article-grid .article-tile>small{margin-top:auto;padding-top:12px}
+.article-grid .article-tile>.btn{align-self:flex-start;margin-top:auto}
+@media(max-width:1240px){.r17-wa-layout{grid-template-columns:250px minmax(320px,1fr)}.r17-wa-side{grid-column:1/-1}}
+@media(max-width:920px){.article-grid,.article-grid>.r18-demo-article-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.modalback .modal.r19-lead-modal{width:calc(100vw - 12px);height:calc(100dvh - 12px);max-height:calc(100dvh - 12px)}.r19-lead-head{padding:14px}.r19-lead-head h2{font-size:16px}.r19-lead-tabs{padding:0 8px}.r19-lead-tabs label{flex:1;padding:10px 4px;font-size:12px}.r19-lead-data .grid2{grid-template-columns:1fr}#r19-tab-data:checked~.r19-lead-data{padding:15px}.r19-lead-chat-head,.r19-lead-chat-messages{padding:14px}.r19-lead-chat-foot{flex-direction:column;align-items:stretch}.article-grid,.article-grid>.r18-demo-article-grid{grid-template-columns:1fr}.r17-wa-layout{display:block}.r17-wa-layout>.panel{margin-bottom:12px}.kanban>.column{flex-basis:265px;width:265px}}
+
+/* Rolagem horizontal pertence somente ao quadro Kanban. */
+html,body{overflow-x:clip}
