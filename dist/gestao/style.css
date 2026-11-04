@@ -473,3 +473,15 @@ html,body{overflow-x:clip}
 .kanban#r20r2-kanban .column-footer{margin-top:auto}
 @media(max-height:700px){.kanban#r20r2-kanban>.column{height:clamp(300px,calc(100dvh - 300px),420px);min-height:300px}}
 @media(max-width:600px){.r20r2-nav-text small{display:none}.r20r2-pipeline-nav{padding:8px}.r20r2-nav-button{width:36px;min-width:36px}}
+
+/* ====================================================================
+   FCAP JR R20 R3 - corrigir rolagem fantasma sob o Pipeline.
+   Causa verificada com Chromium: labels .visually-hidden (position:absolute)
+   sem contendo posicionado eram calculados fora das colunas e aumentavam
+   o documentElement.scrollHeight ate o fim dos cartoes ocultos (2131px).
+   Com position:relative aqui, os labels usam o bloco de acoes do card como
+   containing block e respeitam o scroll interno de .column-cards.
+   Nao muda a acessibilidade, altura do Kanban ou eventos de drag-and-drop.
+   FCAPJR_R20R3_FIX_VISUALLY_HIDDEN_OVERFLOW
+   ==================================================================== */
+.kanban#r20r2-kanban .leadcard-actions { position: relative; }
