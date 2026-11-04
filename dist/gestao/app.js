@@ -22,7 +22,7 @@ let dashboardFilters={period:'all',owner:'all',source:'all'};
 // R22: visualizacao mensal. Dados DEMO ficam excluidos por padrao.
 let dashboardTrendMonths=6,dashboardTrendIncludeDemo=false;
 // R23: granularidade e pre-visualizacao ficticia apenas para diretoria, sem gravar no CRM.
-let r23TrendScale='month',r23TrendWeeks=8,r23Presentation=false;
+let r23TrendScale='month',r23TrendWeeks=4,r23Presentation=false;
 // R17 R2: caixa WhatsApp empresarial somente-leitura ate habilitar Meta Cloud API.
 let waThreads=[],waMessages=[],waSelectedId=null,waLoadError='';
 let waFilters={search:'',owner:'all',type:'all'};
@@ -324,7 +324,7 @@ function r23WeekKey(value){
  return d.toISOString().slice(0,10);
 }
 function r23WeeklyTrend(rows,includeDemo=dashboardTrendIncludeDemo,weeks=r23TrendWeeks){
- const n=[4,8,12].includes(Number(weeks))?Number(weeks):8;
+ const n=Math.max(1,Math.min(4,Math.trunc(Number(weeks)||4)));
  const now=r23WeekKey(new Date());
  const start=new Date(now+'T12:00:00Z');
  const dates=Array.from({length:n},(_,i)=>{
@@ -417,7 +417,7 @@ function dashboardTrendChart(selectedLeads){
  const note=noData?'<span class="r22-trend-empty">Sem movimentação neste intervalo. Os dados fictícios não são contabilizados por padrão.</span>':'';
  const periodLabel=weekly?'semanas':'meses';
  const interval=weekly?r23TrendWeeks:dashboardTrendMonths;
- const options=weekly?[[4,'Últimas 4 semanas'],[8,'Últimas 8 semanas'],[12,'Últimas 12 semanas']]:Array.from({length:12},(_,i)=>[i+1,i===0?'Último 1 mês':'Últimos '+(i+1)+' meses']);
+ const options=weekly?Array.from({length:4},(_,i)=>[i+1,i===0?'Última semana':'Últimas '+(i+1)+' semanas']):Array.from({length:12},(_,i)=>[i+1,i===0?'Último 1 mês':'Últimos '+(i+1)+' meses']);
  const selector=`<select id="${weekly?'r23-trend-weeks':'r22-trend-months'}" aria-label="Intervalo do gráfico">${options.map(([n,label])=>`<option value="${n}" ${interval===n?'selected':''}>${label}</option>`).join('')}</select>`;
  const previewButton=r23PreviewAllowed()?`<button type="button" class="r23-presentation-button ${preview?'is-active':''}" data-action="r23-toggle-demo" aria-pressed="${preview}">${preview?'Encerrar apresentação':'Prévia para apresentação'}</button>`:'';
  return `<section class="panel r22-trend-panel r23-trend-panel ${preview?'r23-preview-active':''}" aria-label="Comparativo comercial ${weekly?'semanal':'mensal'}">
@@ -795,7 +795,7 @@ root.addEventListener('change',e=>{
  if(id==='r17-dashboard-owner'){dashboardFilters.owner=e.target.value;render();return}
  if(id==='r17-dashboard-source'){dashboardFilters.source=e.target.value;render();return}
  if(id==='r22-trend-months'){dashboardTrendMonths=Math.max(1,Math.min(12,Math.trunc(Number(e.target.value)||6)));render();return}
- if(id==='r23-trend-weeks'){r23TrendWeeks=[4,8,12].includes(Number(e.target.value))?Number(e.target.value):8;render();return}
+ if(id==='r23-trend-weeks'){r23TrendWeeks=Math.max(1,Math.min(4,Math.trunc(Number(e.target.value)||4)));render();return}
  if(id==='r22-trend-demo'){dashboardTrendIncludeDemo=!!e.target.checked;render();return}
  if(id==='r17-pipeline-owner'){pipelineFilters.owner=e.target.value;render();return}
  if(id==='r17-pipeline-priority'){pipelineFilters.priority=e.target.value;render();return}
