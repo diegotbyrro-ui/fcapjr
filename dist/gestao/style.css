@@ -485,3 +485,37 @@ html,body{overflow-x:clip}
    FCAPJR_R20R3_FIX_VISUALLY_HIDDEN_OVERFLOW
    ==================================================================== */
 .kanban#r20r2-kanban .leadcard-actions { position: relative; }
+
+
+/* FCAPJR_R22_MONTHLY_TREND_CSS_PROOF - Comparativo comercial mensal isolado. */
+.r22-trend-panel{padding:24px 26px;margin:0 0 20px;min-width:0;overflow:hidden}
+.r22-trend-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:18px;margin-bottom:15px}
+.r22-trend-header h2{font-size:20px;margin:5px 0 5px;letter-spacing:-.025em}
+.r22-trend-header p{margin:0;font-size:12px}
+.r22-trend-filters{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.r22-trend-filters>label:not(.r22-trend-demo){font-size:11px;font-weight:700;color:var(--ap-text-soft);display:flex;flex-direction:column;gap:5px}
+.r22-trend-filters select{min-width:155px;padding:9px 10px;border-radius:8px;border:1px solid var(--ap-border-strong);background:var(--ap-surface);color:var(--ap-text);font-size:12px}
+.r22-trend-demo{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--ap-text-soft);font-weight:600;white-space:nowrap;margin-top:16px}
+.r22-trend-demo input{accent-color:var(--ap-blue);height:15px;width:15px}
+.r22-trend-overview{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding:12px 0 8px;border-top:1px solid var(--ap-border)}
+.r22-trend-summary{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ap-text-soft)}
+.r22-trend-summary strong{font-size:18px;color:var(--ap-text);margin-left:3px;font-weight:800}
+.r22-legend-dot{width:11px;height:11px;display:inline-block;border-radius:50%;flex:none}
+.r22-legend-leads{background:#2563eb}.r22-legend-meetings{background:#008f83}
+.r22-trend-scope{margin-left:auto;background:var(--ap-surface-2);border:1px solid var(--ap-border);padding:6px 10px;border-radius:50px;color:var(--ap-text-soft);font-size:10px;font-weight:700}
+.r22-chart-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--ap-border-strong) transparent}
+.r22-trend-svg{display:block;width:100%;min-width:610px;height:auto;font-family:inherit;overflow:visible}
+.r22-trend-svg.r22-trend-12{min-width:850px}
+.r22-chart-grid{stroke:var(--ap-border);stroke-width:1;stroke-dasharray:4 5}
+.r22-chart-tick,.r22-chart-month{fill:var(--ap-text-soft);font-size:12px}
+.r22-chart-month{font-size:12px;font-weight:600}
+.r22-chart-line{fill:none;stroke-width:3.1;stroke-linecap:round;stroke-linejoin:round}
+.r22-chart-line.r22-chart-leads{stroke:#2563eb}
+.r22-chart-line.r22-chart-meetings{stroke:#008f83}
+.r22-chart-point{fill:var(--ap-surface);stroke-width:3;cursor:help;transition:r .15s ease}
+.r22-chart-point.r22-chart-leads{stroke:#2563eb}
+.r22-chart-point.r22-chart-meetings{stroke:#008f83}
+.r22-chart-point:hover,.r22-chart-point:focus{r:7;outline:none;stroke-width:4}
+.r22-trend-foot{border-top:1px solid var(--ap-border);padding-top:11px;margin-top:2px;display:flex;gap:10px;flex-direction:column;font-size:11px;line-height:1.55;color:var(--ap-text-soft)}
+.r22-trend-empty{font-weight:750;color:var(--ap-text);display:block}
+@media(max-width:700px){.r22-trend-panel{padding:16px 13px}.r22-trend-header{gap:14px}.r22-trend-header h2{font-size:17px}.r22-trend-filters{width:100%;justify-content:space-between}.r22-trend-overview{gap:12px}.r22-trend-scope{margin-left:0}.r22-trend-svg{min-width:610px}}

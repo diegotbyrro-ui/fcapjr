@@ -19,6 +19,8 @@ let conversationLeadId=null,conversationHistory=[],conversationHistoryStatus='id
 let conversationFilters={search:'',owner:'all',activity:'all'};
 let pipelineFilters={search:'',owner:'all',priority:'all',stale:'all'};
 let dashboardFilters={period:'all',owner:'all',source:'all'};
+// R22: visualizacao mensal. Dados DEMO ficam excluidos por padrao.
+let dashboardTrendMonths=6,dashboardTrendIncludeDemo=false;
 // R17 R2: caixa WhatsApp empresarial somente-leitura ate habilitar Meta Cloud API.
 let waThreads=[],waMessages=[],waSelectedId=null,waLoadError='';
 let waFilters={search:'',owner:'all',type:'all'};
@@ -264,6 +266,81 @@ function dashBar(label,count,total,extra=''){
  const pct=total?Math.round(count*100/total):0;
  return `<div class="dash-bar-item"><div class="dash-bar-head"><span>${esc(label)}</span><b>${count} <small>(${pct}%)</small></b></div><div class="dash-bar-track" role="img" aria-label="${esc(label)}: ${count} de ${total}"><i style="width:${pct}%"></i></div>${extra?`<small class="muted">${esc(extra)}</small>`:''}</div>`;
 }
+
+/* FCAPJR_R22_MONTHLY_TREND_PROOF: serie temporal no Dashboard, sem bibliotecas ou APIs externas.
+   Todos os registros provem de leads/meetings ja carregados sob RLS do usuario. */
+const r22MonthDateFormat=new Intl.DateTimeFormat('en-US',{year:'numeric',month:'2-digit',timeZone:'America/Recife'});
+const r22ShortMonthFormat=new Intl.DateTimeFormat('pt-BR',{month:'short',timeZone:'UTC'});
+function r22MonthKey(value){
+ const d=value instanceof Date?value:new Date(value);
+ if(!Number.isFinite(d.getTime()))return '';
+ const p=r22MonthDateFormat.formatToParts(d);
+ const y=p.find(x=>x.type==='year')?.value;
+ const m=p.find(x=>x.type==='month')?.value;
+ return y&&m?`${y}-${m}`:'';
+}
+function r22MonthlyTrend(rows,includeDemo=dashboardTrendIncludeDemo,months=dashboardTrendMonths){
+ const n=months===12?12:6;
+ const current=r22MonthKey(new Date());
+ const [year,month]=(current||'2026-01').split('-').map(Number);
+ const timeline=Array.from({length:n},(_,i)=>{
+  const d=new Date(Date.UTC(year,month-n+i,1));
+  return {key:d.toISOString().slice(0,7),label:r22ShortMonthFormat.format(d).replace('.',''),year:d.getUTCFullYear(),leads:0,meetings:0};
+ });
+ const map=new Map(timeline.map(x=>[x.key,x]));
+ const eligible=rows.filter(l=>includeDemo||!isDemoLead(l));
+ const ids=new Set(eligible.map(l=>l.id));
+ eligible.forEach(l=>{const x=map.get(r22MonthKey(l.created_at));if(x)x.leads++});
+ meetings.forEach(m=>{
+  if(m.status==='cancelada'||(!includeDemo&&m.__demo)||!ids.has(m.lead_id))return;
+  const x=map.get(r22MonthKey(m.start_at));if(x)x.meetings++;
+ });
+ return timeline;
+}
+function r22NiceStep(value){
+ if(value<=1)return 1;
+ const power=Math.pow(10,Math.floor(Math.log10(value)));
+ const fraction=value/power;
+ return (fraction<=1?1:fraction<=2?2:fraction<=5?5:10)*power;
+}
+function dashboardTrendChart(selectedLeads){
+ const values=r22MonthlyTrend(selectedLeads);
+ const totalLeads=values.reduce((s,m)=>s+m.leads,0);
+ const totalMeetings=values.reduce((s,m)=>s+m.meetings,0);
+ const maximum=Math.max(1,...values.flatMap(m=>[m.leads,m.meetings]));
+ const step=r22NiceStep(maximum/4),top=step*4;
+ const width=960,left=50,right=22,topY=24,height=192;
+ const x=i=>left+i*(width-left-right)/(values.length-1);
+ const y=value=>topY+height*(1-value/top);
+ const fmt=n=>Number(n.toFixed(2));
+ const path=metric=>values.map((m,i)=>`${i?'L':'M'} ${fmt(x(i))} ${fmt(y(m[metric]))}`).join(' ');
+ const leadPath=path('leads');
+ const area=`${leadPath} L ${fmt(x(values.length-1))} ${fmt(y(0))} L ${fmt(x(0))} ${fmt(y(0))} Z`;
+ const grid=Array.from({length:5},(_,i)=>{
+  const tick=i*step,ty=fmt(y(tick));
+  return `<line class="r22-chart-grid" x1="${left}" y1="${ty}" x2="${width-right}" y2="${ty}"/><text class="r22-chart-tick" x="${left-13}" y="${ty+4}" text-anchor="end">${tick}</text>`;
+ }).join('');
+ const labels=values.map((m,i)=>`<text class="r22-chart-month" x="${fmt(x(i))}" y="${topY+height+30}" text-anchor="middle">${esc(m.label)}${m.key.slice(5)==='01'?' '+m.year:''}</text>`).join('');
+ const points=metric=>values.map((m,i)=>`<circle class="r22-chart-point r22-chart-${metric}" cx="${fmt(x(i))}" cy="${fmt(y(m[metric]))}" r="5" tabindex="0"><title>${esc(m.label)} ${m.year}: ${m[metric]} ${metric==='leads'?'leads cadastrados':'reuniões agendadas'}</title></circle>`).join('');
+ const noData=totalLeads===0&&totalMeetings===0;
+ const note=noData?'<span class="r22-trend-empty">Sem movimentação neste intervalo. Os dados fictícios não são contabilizados por padrão.</span>':'';
+ return `<section class="panel r22-trend-panel" aria-label="Comparativo comercial por mês">
+   <div class="r22-trend-header"><div><span class="eyebrow">EVOLUÇÃO COMERCIAL</span><h2>Comparativo mês a mês</h2><p class="muted">Leads cadastrados × reuniões agendadas vinculadas aos leads filtrados</p></div>
+    <div class="r22-trend-filters"><label>Período<select id="r22-trend-months" aria-label="Intervalo de meses"><option value="6" ${dashboardTrendMonths===6?'selected':''}>Últimos 6 meses</option><option value="12" ${dashboardTrendMonths===12?'selected':''}>Últimos 12 meses</option></select></label><label class="r22-trend-demo"><input type="checkbox" id="r22-trend-demo" ${dashboardTrendIncludeDemo?'checked':''}><span>Incluir demonstração</span></label></div>
+   </div>
+   <div class="r22-trend-overview"><div class="r22-trend-summary"><span class="r22-legend-dot r22-legend-leads"></span><span>Novos leads</span><strong>${totalLeads}</strong></div><div class="r22-trend-summary"><span class="r22-legend-dot r22-legend-meetings"></span><span>Reuniões agendadas</span><strong>${totalMeetings}</strong></div><span class="r22-trend-scope">${dashboardTrendIncludeDemo?'Visualização com dados fictícios incluídos':'Somente dados reais'}</span></div>
+   <div class="r22-chart-scroll"><svg class="r22-trend-svg ${values.length===12?'r22-trend-12':''}" viewBox="0 0 ${width} 267" role="img" aria-label="Evolução comercial: ${totalLeads} leads e ${totalMeetings} reuniões em ${values.length} meses">
+      <defs><linearGradient id="r22LeadShade" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".16"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
+      ${grid}
+      <path class="r22-chart-area" d="${area}" fill="url(#r22LeadShade)"/>
+      <path class="r22-chart-line r22-chart-leads" d="${leadPath}"/>
+      <path class="r22-chart-line r22-chart-meetings" d="${path('meetings')}"/>
+      ${points('leads')}${points('meetings')}${labels}
+    </svg></div>
+   <div class="r22-trend-foot">${note}<span>Os pontos mostram o valor mensal. O gráfico considera os filtros do Dashboard e os dados autorizados para seu usuário.${dashboardTrendIncludeDemo?' Os registros [DEMO] e as reuniões [EXEMPLO] são fictícios.':''}${leads.length>=1000||meetings.length>=500?' Atenção: o carregamento atual tem limite de registros e pode não representar o histórico completo.':''}</span></div>
+ </section>`;
+}
+
 function dashboard(){
  const selectedLeads=filteredDashboardLeads();
  const m=dashMetrics(selectedLeads),est=m.estimated,openAmount=est(m.opened),wonAmount=est(m.won);
@@ -294,6 +371,7 @@ function dashboard(){
    <label>Origem<select id="r17-dashboard-source">${r17SelectOptions([...new Set(leads.map(l=>String(l.source||'')))].filter(Boolean).sort().map(x=>[x,x.replaceAll('_',' ')]),dashboardFilters.source,'Todas as origens')}</select></label>
    <p class="muted">Os filtros se aplicam aos indicadores de leads e do funil; tarefas e reuniões seguem o acesso do seu perfil. A consulta atual carrega até 1.000 leads.</p>
  </div>${leads.some(isDemoLead)?'<p class="r17-wa-demo-warning">ATENÇÃO: os indicadores incluem clientes fictícios [DEMO], usados apenas para apresentação. Não interprete estes números como resultados reais.</p>':''}<div class="dash-kpis">${indicators.map(([name,val,help])=>`<div class="card dash-kpi"><span>${esc(name)}</span><strong>${esc(val)}</strong><small>${esc(help)}</small></div>`).join('')}</div>
+ ${dashboardTrendChart(selectedLeads)}
  <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Distribuição do funil</h2><span class="tag">${selectedLeads.length} registros</span></div>${stagesHTML}</section><section class="panel"><h2>Origem das oportunidades</h2>${sourcesHTML}</section></div>
  <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Produtividade da equipe</h2><span class="tag">${sellers.length} integrantes ativos</span></div>${teamHTML}</section><section class="panel"><h2>Atividade registrada</h2><div class="dash-activity-grid"><div><b>${m.completed.length}</b><small>Tarefas concluídas</small></div><div><b>${m.pending.length}</b><small>Tarefas pendentes</small></div><div><b>${meetings.filter(x=>x.status==='confirmada').length}</b><small>Reuniões confirmadas</small></div><div><b>${interactions.length}</b><small>Interações carregadas</small></div><div><b>${analysisCount}</b><small>Análises IA nos últimos 30 dias</small></div><div><b>${m.unassigned.length}</b><small>Leads abertos sem responsável</small></div></div></section></div>
  <div class="dash-top-grid"><section class="panel"><h2>Próximas reuniões</h2>${items}</section><section class="panel"><h2>Prazos que exigem atenção</h2>${overdue}</section></div>
@@ -606,6 +684,8 @@ root.addEventListener('change',e=>{
  if(id==='r17-dashboard-period'){dashboardFilters.period=e.target.value;render();return}
  if(id==='r17-dashboard-owner'){dashboardFilters.owner=e.target.value;render();return}
  if(id==='r17-dashboard-source'){dashboardFilters.source=e.target.value;render();return}
+ if(id==='r22-trend-months'){dashboardTrendMonths=e.target.value==='12'?12:6;render();return}
+ if(id==='r22-trend-demo'){dashboardTrendIncludeDemo=!!e.target.checked;render();return}
  if(id==='r17-pipeline-owner'){pipelineFilters.owner=e.target.value;render();return}
  if(id==='r17-pipeline-priority'){pipelineFilters.priority=e.target.value;render();return}
  if(id==='r17-pipeline-stale'){pipelineFilters.stale=e.target.value;render();return}
