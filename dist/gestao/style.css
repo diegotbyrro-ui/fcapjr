@@ -208,3 +208,40 @@ label{font-size:12px;color:#4f6178;font-weight:800}
 @media(max-width:1160px){.dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:800px){.dash-top-grid{grid-template-columns:1fr}.dash-contacts .section-heading{display:block}.dash-contacts .section-heading .btn{margin-top:12px}}
 @media(max-width:520px){.dash-kpis{grid-template-columns:1fr 1fr;gap:9px}.dash-kpi{min-height:112px;padding:13px}.dash-kpi strong{font-size:22px}.dash-activity-grid{grid-template-columns:1fr 1fr}.dash-actions{width:100%}.dash-actions .btn{flex:1 1 auto}.dash-team-row{align-items:flex-start;flex-direction:column}}
+
+
+/* FCAP JR R17 R1 - filtros comerciais e Central de Conversas (registros manuais) */
+.r17-dashboard-filters,.r17-pipeline-filters,.r17-conversation-filters{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:14px;align-items:end;margin:16px 0;padding:18px 20px!important}
+.r17-pipeline-filters{grid-template-columns:minmax(220px,1.8fr) repeat(3,minmax(155px,1fr))}
+.r17-dashboard-filters label,.r17-pipeline-filters label,.r17-conversation-filters label{display:block;min-width:0}
+.r17-dashboard-filters select,.r17-pipeline-filters select,.r17-pipeline-filters input,.r17-conversation-filters select,.r17-conversation-filters input{display:block;width:100%;margin-top:8px}
+.r17-dashboard-filters p,.r17-pipeline-filters small,.r17-conversation-filters small{grid-column:1/-1;margin:0;font-size:12px}
+.r17-conversations-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.r17-conversations-header h2{margin:5px 0 8px}
+.r17-conversations-header p{margin:0}
+.r17-conversations-header>.tag{white-space:nowrap}
+.r17-conversations-notice{margin-bottom:14px}
+.r17-conversations-layout{display:grid;grid-template-columns:minmax(250px,340px) minmax(0,1fr);gap:16px;align-items:start}
+.r17-conversation-list,.r17-conversation-detail{min-width:0}
+.r17-conversation-list h3{margin:0 0 15px;font-size:17px}
+.r17-conversation-items{display:grid;gap:8px;max-height:700px;overflow:auto;padding-right:4px}
+.r17-conversation-item{display:grid;gap:5px;width:100%;border:1px solid var(--ap-border);background:var(--ap-surface-2);color:var(--ap-text);text-align:left;border-radius:14px;padding:14px;cursor:pointer;font:inherit}
+.r17-conversation-item strong{font-size:13px}
+.r17-conversation-item small,.r17-conversation-item span{font-size:11px;color:var(--ap-text-soft)}
+.r17-conversation-item.active{border-color:var(--ap-blue);background:var(--ap-blue-soft)}
+.r17-conversation-detail-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--ap-border)}
+.r17-conversation-detail-top h2{margin:7px 0}
+.r17-conversation-detail-top p{font-size:12px;line-height:1.6;color:var(--ap-text-soft);margin:0}
+.r17-conversation-thread{display:grid;gap:12px;padding:20px 0;max-height:470px;overflow:auto}
+.r17-conversation-entry{padding:14px 16px;border:1px solid var(--ap-border);background:var(--ap-surface-2);border-radius:14px}
+.r17-conversation-entry-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.r17-conversation-entry-top small{color:var(--ap-text-soft);font-size:11px}
+.r17-conversation-entry p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.6;margin:12px 0 9px}
+.r17-conversation-entry>small{font-size:11px}
+.r17-conversation-compose{display:grid;gap:12px;border-top:1px solid var(--ap-border);padding-top:20px}
+.r17-conversation-compose label{display:grid;gap:7px}
+.r17-composer-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.r17-composer-actions small{max-width:430px;font-size:11px}
+@media(max-width:1150px){.r17-pipeline-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:820px){.r17-conversations-layout{grid-template-columns:1fr}.r17-conversation-items{max-height:250px}.r17-dashboard-filters,.r17-conversation-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.r17-dashboard-filters,.r17-pipeline-filters,.r17-conversation-filters{grid-template-columns:1fr}.r17-conversations-header,.r17-conversation-detail-top{flex-direction:column}.r17-dashboard-filters p,.r17-pipeline-filters small,.r17-conversation-filters small{grid-column:1}}
