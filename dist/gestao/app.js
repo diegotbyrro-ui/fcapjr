@@ -21,6 +21,8 @@ let pipelineFilters={search:'',owner:'all',priority:'all',stale:'all'};
 let dashboardFilters={period:'all',owner:'all',source:'all'};
 // R22: visualizacao mensal. Dados DEMO ficam excluidos por padrao.
 let dashboardTrendMonths=6,dashboardTrendIncludeDemo=false;
+// R23: granularidade e pre-visualizacao ficticia apenas para diretoria, sem gravar no CRM.
+let r23TrendScale='month',r23TrendWeeks=8,r23Presentation=false;
 // R17 R2: caixa WhatsApp empresarial somente-leitura ate habilitar Meta Cloud API.
 let waThreads=[],waMessages=[],waSelectedId=null,waLoadError='';
 let waFilters={search:'',owner:'all',type:'all'};
@@ -231,7 +233,7 @@ function render(){
  const initials=String(member.full_name||'FC').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
  const firstName=String(member.full_name||'Usuário').trim().split(/\s+/)[0]||'Usuário';
  const navItems=menus.filter(x=>visible(x[0])).map(x=>`<button type="button" data-page="${x[0]}" class="${page===x[0]?'active':''}"><span class="navicon" aria-hidden="true">${navIcon(x[0])}</span><span>${x[2]}</span>${x[0]==='avisos'&&unread?`<em class="notification-count">${unread}</em>`:''}</button>`).join('');
- root.innerHTML=`<div class="shell ap-shell"><aside class="sidebar"><div class="sidebrand sidebrand-compact"><div class="brand-square brand-square-large"><img src="../assets/logo-fcap-clean.svg" alt="FCAP JR."></div><div class="sidebrand-copy"><small>Painel de gestão</small></div></div><div class="nav-section">NAVEGAÇÃO</div><nav class="nav">${navItems}</nav><div class="sidefooter"><button type="button" data-action="theme-toggle" class="theme-toggle"><span aria-hidden="true">◐</span> Alternar tema</button><div class="member-footer"><div class="member-copy"><b>${esc(member.full_name)}</b><small>${esc(displayRole(member.role))}</small></div></div><button class="logout" data-action="logout">Sair do sistema ↗</button><small class="build-version">FCAP JR. · R20 R2 R1</small></div></aside><div class="workspace"><div class="topbar"><div>${headerCalendarMirror()}<h1>${esc(info[2])}</h1><p>FCAP Jr. · Gestão comercial</p></div><div class="topactions"><div class="profile-chip" title="Usuário conectado"><strong>${esc(firstName)}</strong></div><button class="btn secondary" data-action="refresh">Atualizar</button></div></div><main class="content">${content()}</main></div></div>${modal?modalHTML():''}`;
+ root.innerHTML=`<div class="shell ap-shell"><aside class="sidebar"><div class="sidebrand sidebrand-compact"><div class="brand-square brand-square-large"><img src="../assets/logo-fcap-clean.svg" alt="FCAP JR."></div><div class="sidebrand-copy"><small>Painel de gestão</small></div></div><div class="nav-section">NAVEGAÇÃO</div><nav class="nav">${navItems}</nav><div class="sidefooter"><button type="button" data-action="theme-toggle" class="theme-toggle"><span aria-hidden="true">◐</span> Alternar tema</button><div class="member-footer"><div class="member-copy"><b>${esc(member.full_name)}</b><small>${esc(displayRole(member.role))}</small></div></div><button class="logout" data-action="logout">Sair do sistema ↗</button><small class="build-version">FCAP JR. · R23</small></div></aside><div class="workspace"><div class="topbar"><div>${headerCalendarMirror()}<h1>${esc(info[2])}</h1><p>FCAP Jr. · Gestão comercial</p></div><div class="topactions"><div class="profile-chip" title="Usuário conectado"><strong>${esc(firstName)}</strong></div><button class="btn secondary" data-action="refresh">Atualizar</button></div></div><main class="content">${content()}</main></div></div>${modal?modalHTML():''}`;
  if(page==='pipeline'){wirePipelineNavigation();wireDrag();}
 }
 
@@ -303,41 +305,140 @@ function r22NiceStep(value){
  const fraction=value/power;
  return (fraction<=1?1:fraction<=2?2:fraction<=5?5:10)*power;
 }
+/* FCAPJR_R23_PREMIUM_DASHBOARD_PROOF - semanal/mensal, cards semanticos e simulacao local. */
+const r23PreviewAllowed=()=>!!member&&['admin','gestor'].includes(member.role);
+const r23PreviewActive=()=>r23PreviewAllowed()&&r23Presentation;
+const r23DayParts=new Intl.DateTimeFormat('en-GB',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'America/Recife'});
+function r23LocalDateKey(value){
+ const d=value instanceof Date?value:new Date(value);
+ if(!Number.isFinite(d.getTime()))return '';
+ const p=r23DayParts.formatToParts(d);
+ const part=k=>p.find(x=>x.type===k)?.value;
+ return `${part('year')}-${part('month')}-${part('day')}`;
+}
+function r23WeekKey(value){
+ const key=r23LocalDateKey(value);
+ if(!key)return '';
+ const d=new Date(key+'T12:00:00Z');
+ d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7);
+ return d.toISOString().slice(0,10);
+}
+function r23WeeklyTrend(rows,includeDemo=dashboardTrendIncludeDemo,weeks=r23TrendWeeks){
+ const n=[4,8,12].includes(Number(weeks))?Number(weeks):8;
+ const now=r23WeekKey(new Date());
+ const start=new Date(now+'T12:00:00Z');
+ const dates=Array.from({length:n},(_,i)=>{
+  const d=new Date(start);d.setUTCDate(d.getUTCDate()-7*(n-1-i));
+  const key=d.toISOString().slice(0,10);
+  const label=new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short',timeZone:'UTC'}).format(d).replace('.','');
+  return {key,label,year:d.getUTCFullYear(),leads:0,meetings:0};
+ });
+ const map=new Map(dates.map(d=>[d.key,d]));
+ const eligible=rows.filter(l=>includeDemo||!isDemoLead(l));
+ const ids=new Set(eligible.map(l=>l.id));
+ eligible.forEach(l=>{const p=map.get(r23WeekKey(l.created_at));if(p)p.leads++});
+ meetings.forEach(m=>{
+  if(m.status==='cancelada'||(!includeDemo&&m.__demo)||!ids.has(m.lead_id))return;
+  const p=map.get(r23WeekKey(m.start_at));if(p)p.meetings++;
+ });
+ return dates;
+}
+function r23PresentationValues(timeline,weekly){
+ // Totalmente inventados para demonstracao. Nunca persistir nem utilizar em relatorios reais.
+ const monthL=[48,55,61,64,72,81,98,112,118,131,129,144];
+ const monthM=[17,22,26,29,32,36,34,38,44,47,56,68];
+ const weekL=[6,9,8,12,11,13,16,18,15,20,22,26];
+ const weekM=[2,3,4,5,4,7,6,8,7,10,11,13];
+ const a=weekly?weekL:monthL,b=weekly?weekM:monthM;
+ const left=a.length-timeline.length;
+ return timeline.map((t,i)=>({...t,leads:a[left+i],meetings:b[left+i]}));
+}
+function r23DataSeries(rows){
+ const weekly=r23TrendScale==='week';
+ const series=weekly?r23WeeklyTrend(rows):r22MonthlyTrend(rows);
+ return r23PreviewActive()?r23PresentationValues(series,weekly):series;
+}
+function r23Delta(current,previous){
+ if(!previous)return {label:current?'Sem base anterior':'Sem variação',tone:'neutral'};
+ const pct=(current-previous)*100/previous;
+ const signed=(pct>0?'+':'')+pct.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+ return {label:signed,tone:pct>0?'up':pct<0?'down':'neutral'};
+}
+function r23KpiIcon(key){
+ const paths={
+  users:'<path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 15h4"/>',
+  briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M2 12h20M11 12v3h2v-3"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8M16 7h5v5"/>',
+  trophy:'<path d="M8 21h8M12 17v4M7 3h10v7a5 5 0 0 1-10 0V3zM7 5H4v3a4 4 0 0 0 4 4M17 5h3v3a4 4 0 0 1-4 4"/>',
+  alert:'<path d="M10.3 3.2 1.8 18a2 2 0 0 0 1.8 3h16.8a2 2 0 0 0 1.8-3L13.7 3.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'
+ };
+ return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]||paths.trend}</svg>`;
+}
+function r23KpiCards(items){
+ return items.map(([name,value,help,tone,ico,change])=>{
+  const chip=change?`<span class="r23-kpi-change r23-change-${change.tone}">${esc(change.label)}</span>`:'';
+  return `<article class="card dash-kpi r23-kpi-card r23-tone-${tone}">
+   <div class="r23-kpi-row"><span class="r23-kpi-symbol">${r23KpiIcon(ico)}</span><span class="r23-kpi-name">${esc(name)}</span></div>
+   <div class="r23-kpi-value"><strong>${esc(value)}</strong>${chip}</div>
+   <small>${esc(help)}</small></article>`;
+ }).join('');
+}
 function dashboardTrendChart(selectedLeads){
- const values=r22MonthlyTrend(selectedLeads);
+ const values=r23DataSeries(selectedLeads),weekly=r23TrendScale==='week',preview=r23PreviewActive();
  const totalLeads=values.reduce((s,m)=>s+m.leads,0);
  const totalMeetings=values.reduce((s,m)=>s+m.meetings,0);
- const maximum=Math.max(1,...values.flatMap(m=>[m.leads,m.meetings]));
- const step=r22NiceStep(maximum/4),top=step*4;
- const width=960,left=50,right=22,topY=24,height=192;
+ const last=values[values.length-1],prev=values[values.length-2];
+ const leadChange=r23Delta(last.leads,prev.leads),meetingChange=r23Delta(last.meetings,prev.meetings);
+ const max=Math.max(1,...values.flatMap(m=>[m.leads,m.meetings]));
+ const step=r22NiceStep(max/4),top=step*4;
+ const width=1000,left=52,right=27,topY=34,height=223;
  const x=i=>left+i*(width-left-right)/(values.length-1);
- const y=value=>topY+height*(1-value/top);
+ const y=v=>topY+height*(1-v/top);
  const fmt=n=>Number(n.toFixed(2));
  const path=metric=>values.map((m,i)=>`${i?'L':'M'} ${fmt(x(i))} ${fmt(y(m[metric]))}`).join(' ');
- const leadPath=path('leads');
- const area=`${leadPath} L ${fmt(x(values.length-1))} ${fmt(y(0))} L ${fmt(x(0))} ${fmt(y(0))} Z`;
+ const leadPath=path('leads'),meetPath=path('meetings');
+ const area=metric=>`${path(metric)} L ${fmt(x(values.length-1))} ${fmt(y(0))} L ${fmt(x(0))} ${fmt(y(0))} Z`;
  const grid=Array.from({length:5},(_,i)=>{
   const tick=i*step,ty=fmt(y(tick));
-  return `<line class="r22-chart-grid" x1="${left}" y1="${ty}" x2="${width-right}" y2="${ty}"/><text class="r22-chart-tick" x="${left-13}" y="${ty+4}" text-anchor="end">${tick}</text>`;
+  return `<line class="r22-chart-grid" x1="${left}" y1="${ty}" x2="${width-right}" y2="${ty}"/><text class="r22-chart-tick" x="${left-16}" y="${ty+4}" text-anchor="end">${tick}</text>`;
  }).join('');
- const labels=values.map((m,i)=>`<text class="r22-chart-month" x="${fmt(x(i))}" y="${topY+height+30}" text-anchor="middle">${esc(m.label)}${m.key.slice(5)==='01'?' '+m.year:''}</text>`).join('');
- const points=metric=>values.map((m,i)=>`<circle class="r22-chart-point r22-chart-${metric}" cx="${fmt(x(i))}" cy="${fmt(y(m[metric]))}" r="5" tabindex="0"><title>${esc(m.label)} ${m.year}: ${m[metric]} ${metric==='leads'?'leads cadastrados':'reuniões agendadas'}</title></circle>`).join('');
+ const labels=values.map((m,i)=>`<text class="r22-chart-month" x="${fmt(x(i))}" y="${topY+height+31}" text-anchor="middle">${esc(m.label)}${!weekly&&m.key.slice(5)==='01'?' '+m.year:''}</text>`).join('');
+ const points=metric=>values.map((m,i)=>{
+  const cx=fmt(x(i)),cy=fmt(y(m[metric])),value=m[metric];
+  const showTag=values.length<=8||i===values.length-1||(i%3===0);
+  const tagY=metric==='leads'?Math.max(15,cy-20):Math.min(topY+height-2,cy-18);
+  const tag=showTag&&value>0?`<g class="r23-chart-tag r23-chart-tag-${metric}" aria-hidden="true"><rect x="${fmt(cx-17)}" y="${fmt(tagY-14)}" width="34" height="19" rx="6"/><text x="${cx}" y="${fmt(tagY)}" text-anchor="middle">${value}</text></g>`:'';
+  return `${tag}<circle class="r22-chart-point r22-chart-${metric}" cx="${cx}" cy="${cy}" r="5" tabindex="0"><title>${esc(m.label)} ${m.year}: ${value} ${metric==='leads'?'leads cadastrados':'reuniões agendadas'}</title></circle>`;
+ }).join('');
  const noData=totalLeads===0&&totalMeetings===0;
  const note=noData?'<span class="r22-trend-empty">Sem movimentação neste intervalo. Os dados fictícios não são contabilizados por padrão.</span>':'';
- return `<section class="panel r22-trend-panel" aria-label="Comparativo comercial por mês">
-   <div class="r22-trend-header"><div><span class="eyebrow">EVOLUÇÃO COMERCIAL</span><h2>Comparativo mês a mês</h2><p class="muted">Leads cadastrados × reuniões agendadas vinculadas aos leads filtrados</p></div>
-    <div class="r22-trend-filters"><label>Período<select id="r22-trend-months" aria-label="Intervalo de meses"><option value="6" ${dashboardTrendMonths===6?'selected':''}>Últimos 6 meses</option><option value="12" ${dashboardTrendMonths===12?'selected':''}>Últimos 12 meses</option></select></label><label class="r22-trend-demo"><input type="checkbox" id="r22-trend-demo" ${dashboardTrendIncludeDemo?'checked':''}><span>Incluir demonstração</span></label></div>
-   </div>
-   <div class="r22-trend-overview"><div class="r22-trend-summary"><span class="r22-legend-dot r22-legend-leads"></span><span>Novos leads</span><strong>${totalLeads}</strong></div><div class="r22-trend-summary"><span class="r22-legend-dot r22-legend-meetings"></span><span>Reuniões agendadas</span><strong>${totalMeetings}</strong></div><span class="r22-trend-scope">${dashboardTrendIncludeDemo?'Visualização com dados fictícios incluídos':'Somente dados reais'}</span></div>
-   <div class="r22-chart-scroll"><svg class="r22-trend-svg ${values.length===12?'r22-trend-12':''}" viewBox="0 0 ${width} 267" role="img" aria-label="Evolução comercial: ${totalLeads} leads e ${totalMeetings} reuniões em ${values.length} meses">
-      <defs><linearGradient id="r22LeadShade" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".16"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
-      ${grid}
-      <path class="r22-chart-area" d="${area}" fill="url(#r22LeadShade)"/>
-      <path class="r22-chart-line r22-chart-leads" d="${leadPath}"/>
-      <path class="r22-chart-line r22-chart-meetings" d="${path('meetings')}"/>
-      ${points('leads')}${points('meetings')}${labels}
-    </svg></div>
-   <div class="r22-trend-foot">${note}<span>Os pontos mostram o valor mensal. O gráfico considera os filtros do Dashboard e os dados autorizados para seu usuário.${dashboardTrendIncludeDemo?' Os registros [DEMO] e as reuniões [EXEMPLO] são fictícios.':''}${leads.length>=1000||meetings.length>=500?' Atenção: o carregamento atual tem limite de registros e pode não representar o histórico completo.':''}</span></div>
+ const periodLabel=weekly?'semanas':'meses';
+ const interval=weekly?r23TrendWeeks:dashboardTrendMonths;
+ const options=weekly?[[4,'Últimas 4 semanas'],[8,'Últimas 8 semanas'],[12,'Últimas 12 semanas']]:[[6,'Últimos 6 meses'],[12,'Últimos 12 meses']];
+ const selector=`<select id="${weekly?'r23-trend-weeks':'r22-trend-months'}" aria-label="Intervalo do gráfico">${options.map(([n,label])=>`<option value="${n}" ${interval===n?'selected':''}>${label}</option>`).join('')}</select>`;
+ const previewButton=r23PreviewAllowed()?`<button type="button" class="r23-presentation-button ${preview?'is-active':''}" data-action="r23-toggle-demo" aria-pressed="${preview}">${preview?'Encerrar apresentação':'Prévia para apresentação'}</button>`:'';
+ return `<section class="panel r22-trend-panel r23-trend-panel ${preview?'r23-preview-active':''}" aria-label="Comparativo comercial ${weekly?'semanal':'mensal'}">
+  <div class="r22-trend-header"><div><span class="eyebrow">EVOLUÇÃO COMERCIAL</span><h2>Comparativo comercial</h2><p class="muted">Leads cadastrados × reuniões agendadas vinculadas aos leads filtrados</p></div>
+    <span class="r23-trend-status ${preview?'is-demo':''}">${preview?'EXEMPLO FICTÍCIO':'DADOS DO CRM'}</span></div>
+  <div class="r23-trend-toolbar"><div class="r23-trend-segment" role="group" aria-label="Agrupamento do gráfico">
+    <button type="button" data-action="r23-scale-month" aria-pressed="${!weekly}" class="${!weekly?'is-active':''}">Mês a mês</button><button type="button" data-action="r23-scale-week" aria-pressed="${weekly}" class="${weekly?'is-active':''}">Semana a semana</button>
+   </div><div class="r22-trend-filters"><label>Período ${selector}</label>${previewButton}
+   ${!preview?`<label class="r22-trend-demo"><input type="checkbox" id="r22-trend-demo" ${dashboardTrendIncludeDemo?'checked':''}><span>Incluir DEMO do CRM</span></label>`:''}
+   </div></div>
+  <div class="r22-trend-overview"><div class="r22-trend-summary"><span class="r22-legend-dot r22-legend-leads"></span><span>Novos leads</span><strong>${totalLeads}</strong><span class="r23-trend-delta r23-change-${leadChange.tone}">${esc(leadChange.label)}</span></div>
+   <div class="r22-trend-summary"><span class="r22-legend-dot r22-legend-meetings"></span><span>Reuniões agendadas</span><strong>${totalMeetings}</strong><span class="r23-trend-delta r23-change-${meetingChange.tone}">${esc(meetingChange.label)}</span></div>
+   <span class="r22-trend-scope">${preview?'Simulação visual · sem dados reais':dashboardTrendIncludeDemo?'Dados reais + registros DEMO':'Somente dados reais'}</span></div>
+  <div class="r22-chart-scroll"><svg class="r22-trend-svg r23-trend-svg ${values.length===12?'r22-trend-12':''}" viewBox="0 0 ${width} 310" role="img" aria-label="Evolução comercial: ${totalLeads} leads e ${totalMeetings} reuniões em ${values.length} ${periodLabel}">
+    <defs><linearGradient id="r23BlueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".17"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient><linearGradient id="r23GreenFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#059669" stop-opacity=".15"/><stop offset="100%" stop-color="#059669" stop-opacity="0"/></linearGradient></defs>
+    ${grid}<path d="${area('leads')}" fill="url(#r23BlueFill)"/><path d="${area('meetings')}" fill="url(#r23GreenFill)"/>
+    <path class="r22-chart-line r22-chart-leads" d="${leadPath}"/><path class="r22-chart-line r22-chart-meetings" d="${meetPath}"/>
+    ${points('leads')}${points('meetings')}${labels}
+   </svg></div>
+  <div class="r22-trend-foot">${note}${preview?'<strong class="r23-preview-disclaimer">Apresentação fictícia: os valores desta visualização e dos cartões superiores são simulados e não representam resultados da FCAP Jr.</strong>':''}
+   <span>Comparação dos ${weekly?'7 dias de cada semana (segunda a domingo)':'meses de calendário'}: os percentuais comparam o último período ao imediatamente anterior; o período atual ainda está em andamento. Horário de Maceió. ${preview?'A simulação não utiliza os filtros do CRM.':'O gráfico considera os filtros do Dashboard e o acesso do usuário.'}${!preview&&dashboardTrendIncludeDemo?' Registros [DEMO] e reuniões [EXEMPLO] são fictícios.':''}${!preview&&(leads.length>=1000||meetings.length>=500)?' Atenção: a consulta tem limite de registros; períodos antigos podem estar incompletos.':''}</span></div>
  </section>`;
 }
 
@@ -345,15 +446,20 @@ function dashboard(){
  const selectedLeads=filteredDashboardLeads();
  const m=dashMetrics(selectedLeads),est=m.estimated,openAmount=est(m.opened),wonAmount=est(m.won);
  const canReport=has('reports.view')&&['admin','gestor'].includes(member.role);
+ const liveMonths=r22MonthlyTrend(selectedLeads,false,6);
+ const currentMonth=liveMonths[liveMonths.length-1],previousMonth=liveMonths[liveMonths.length-2];
+ const preview=r23PreviewActive(),exampleMonth=r23PresentationValues(liveMonths,false);
+ const exampleCurrent=exampleMonth[exampleMonth.length-1],examplePrevious=exampleMonth[exampleMonth.length-2];
+ const kpiNow=preview?exampleCurrent:currentMonth,kpiPrev=preview?examplePrevious:previousMonth;
  const indicators=[
- ['Total de leads',selectedLeads.length,'Conforme filtros de cadastro'],
- ['Oportunidades abertas',m.opened.length,'Em negociação'],
- ['Novos nos últimos 30 dias',m.in30.length,'Pela data de cadastro'],
- ['Taxa de conversão',m.winRate===null?'—':m.winRate+'%','Ganhos ÷ negócios decididos'],
- ['Potencial em aberto',money(openAmount),'Valor estimado, não faturado'],
- ['Negócios ganhos',m.won.length,money(wonAmount)+' estimados'],
- ['Tarefas atrasadas',m.overdue.length,'Prazos vencidos e não concluídos'],
- ['Reuniões futuras',m.upcoming.length,'Solicitadas e confirmadas']
+ ['Leads do mês',kpiNow.leads,`vs. mês anterior (${kpiPrev.leads})`,'blue','users',r23Delta(kpiNow.leads,kpiPrev.leads)],
+ ['Reuniões agendadas',kpiNow.meetings,`vs. mês anterior (${kpiPrev.meetings})`,'emerald','calendar',r23Delta(kpiNow.meetings,kpiPrev.meetings)],
+ ['Oportunidades abertas',preview?27:m.opened.length,'Em negociação','amber','briefcase',null],
+ ['Conversão de negócios',preview?'33,8%':m.winRate===null?'—':m.winRate+'%','Ganhos ÷ negócios decididos','violet','target',null],
+ ['Potencial em aberto',preview?'R$ 215.000':money(openAmount),'Valor estimado, não faturado','indigo','trend',null],
+ ['Negócios ganhos',preview?9:m.won.length,preview?'R$ 72.000 estimados':money(wonAmount)+' estimados','teal','trophy',null],
+ ['Tarefas atrasadas',preview?3:m.overdue.length,'Prazos vencidos e não concluídos','rose','alert',null],
+ ['Reuniões futuras',preview?12:m.upcoming.length,'Solicitadas e confirmadas','sky','clock',null]
  ];
  const stagesHTML=stages.map(s=>{const list=selectedLeads.filter(l=>l.stage_id===s.id);return dashBar(s.name,list.length,selectedLeads.length,`${money(est(list))} em oportunidades`)}).join('')||'<p class="empty">Etapas não carregadas.</p>';
  const bySource=new Map();selectedLeads.forEach(l=>{const key=String(l.source||'Não informada').trim()||'Não informada';bySource.set(key,(bySource.get(key)||0)+1)});
@@ -364,19 +470,20 @@ function dashboard(){
  const items=m.upcoming.slice().sort((a,b)=>new Date(a.start_at)-new Date(b.start_at)).slice(0,6).map(x=>`<div class="statline"><span><b>${esc(x.title)}</b><small class="muted" style="display:block">${date(x.start_at)} · ${esc(teammate(x.assigned_to))}</small></span><span class="tag">${esc(x.status)}</span></div>`).join('')||'<p class="empty">Sem reuniões futuras.</p>';
  const overdue=m.overdue.slice().sort((a,b)=>new Date(a.due_at)-new Date(b.due_at)).slice(0,5).map(t=>`<div class="statline"><span><b>${esc(t.title)}</b><small class="muted" style="display:block">Vencida em ${date(t.due_at)} · ${esc(teammate(t.assigned_to))}</small></span></div>`).join('')||'<p class="empty">Nenhuma tarefa em atraso.</p>';
  const analysisCount=analyses.filter(a=>new Date(a.created_at).getTime()>=m.ago30).length;
- return `<div class="dashboard-heading flex space"><div><span class="eyebrow">INTELIGÊNCIA OPERACIONAL</span><h2>Painel completo do CRM</h2><p class="muted">Vendas, equipe, atividades, agenda e prioridades em um só lugar.</p></div><div class="dash-actions">${canReport?'<button class="btn secondary" data-action="director-report">Gerar relatório da diretoria</button>':''}<button class="btn" data-action="new-lead" ${has('leads.edit')?'':'disabled'}>+ Novo lead</button></div></div>
+ return `<div class="r23-dashboard-shell ${preview?'r23-presentation-active':''}"><div class="dashboard-heading flex space"><div><span class="eyebrow">INTELIGÊNCIA OPERACIONAL</span><h2>Painel completo do CRM ${preview?'<span class="r23-heading-demo">PRÉVIA FICTÍCIA</span>':''}</h2><p class="muted">Vendas, equipe, atividades, agenda e prioridades em um só lugar.</p></div><div class="dash-actions">${canReport?'<button class="btn secondary" data-action="director-report">Gerar relatório da diretoria</button>':''}<button class="btn" data-action="new-lead" ${has('leads.edit')?'':'disabled'}>+ Novo lead</button></div></div>
  <div class="r17-dashboard-filters panel" aria-label="Filtros dos leads no Dashboard">
    <label>Período de cadastro<select id="r17-dashboard-period">${r17SelectOptions([['30','Últimos 30 dias'],['90','Últimos 90 dias'],['365','Últimos 12 meses']],dashboardFilters.period,'Todos os períodos')}</select></label>
    <label>Responsável<select id="r17-dashboard-owner">${r17SelectOptions([['unassigned','Sem responsável'],...members.filter(m=>m.active).map(m=>[m.user_id,m.full_name])],dashboardFilters.owner,'Todos os responsáveis')}</select></label>
    <label>Origem<select id="r17-dashboard-source">${r17SelectOptions([...new Set(leads.map(l=>String(l.source||'')))].filter(Boolean).sort().map(x=>[x,x.replaceAll('_',' ')]),dashboardFilters.source,'Todas as origens')}</select></label>
    <p class="muted">Os filtros se aplicam aos indicadores de leads e do funil; tarefas e reuniões seguem o acesso do seu perfil. A consulta atual carrega até 1.000 leads.</p>
- </div>${leads.some(isDemoLead)?'<p class="r17-wa-demo-warning">ATENÇÃO: os indicadores incluem clientes fictícios [DEMO], usados apenas para apresentação. Não interprete estes números como resultados reais.</p>':''}<div class="dash-kpis">${indicators.map(([name,val,help])=>`<div class="card dash-kpi"><span>${esc(name)}</span><strong>${esc(val)}</strong><small>${esc(help)}</small></div>`).join('')}</div>
+ </div>${preview?'<p class="r23-presentation-note">PRÉVIA PARA APRESENTAÇÃO — os cartões coloridos e o gráfico abaixo são inteiramente simulados. Os outros blocos continuam mostrando os dados já autorizados do CRM.</p>':leads.some(isDemoLead)?'<p class="r17-wa-demo-warning">ATENÇÃO: alguns indicadores do CRM incluem clientes fictícios [DEMO]. Leads do mês, reuniões do mês e gráfico excluem DEMO por padrão.</p>':''}<div class="dash-kpis r23-kpis">${r23KpiCards(indicators.slice(0,4))}</div>
  ${dashboardTrendChart(selectedLeads)}
+ <div class="dash-kpis r23-kpis r23-kpis-secondary">${r23KpiCards(indicators.slice(4))}</div>
  <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Distribuição do funil</h2><span class="tag">${selectedLeads.length} registros</span></div>${stagesHTML}</section><section class="panel"><h2>Origem das oportunidades</h2>${sourcesHTML}</section></div>
  <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Produtividade da equipe</h2><span class="tag">${sellers.length} integrantes ativos</span></div>${teamHTML}</section><section class="panel"><h2>Atividade registrada</h2><div class="dash-activity-grid"><div><b>${m.completed.length}</b><small>Tarefas concluídas</small></div><div><b>${m.pending.length}</b><small>Tarefas pendentes</small></div><div><b>${meetings.filter(x=>x.status==='confirmada').length}</b><small>Reuniões confirmadas</small></div><div><b>${interactions.length}</b><small>Interações carregadas</small></div><div><b>${analysisCount}</b><small>Análises IA nos últimos 30 dias</small></div><div><b>${m.unassigned.length}</b><small>Leads abertos sem responsável</small></div></div></section></div>
  <div class="dash-top-grid"><section class="panel"><h2>Próximas reuniões</h2>${items}</section><section class="panel"><h2>Prazos que exigem atenção</h2>${overdue}</section></div>
  <section class="panel"><div class="section-heading"><h2>Leads recentes</h2><span class="tag">Últimos registros</span></div>${recent}</section>
- <p class="dash-disclaimer">Indicadores calculados a partir dos dados visíveis ao seu perfil e dos limites de consulta do CRM (até 1.000 leads, 500 tarefas, 500 reuniões, 750 interações e 250 análises). Valores financeiros são estimativas cadastradas, não faturamento real. ${!selectedLeads.length?'Ainda não há dados comerciais suficientes para análise de conversão.':''}</p>`;
+ <p class="dash-disclaimer">${preview?'Os oito cartões e o gráfico desta prévia são SIMULADOS, apenas para apresentação. Os blocos inferiores continuam mostrando os dados autorizados do CRM. ':''}Indicadores calculados a partir dos dados visíveis ao seu perfil e dos limites de consulta do CRM (até 1.000 leads, 500 tarefas, 500 reuniões, 750 interações e 250 análises). Valores financeiros são estimativas cadastradas, não faturamento real. ${!selectedLeads.length?'Ainda não há dados comerciais suficientes para análise de conversão.':''}</p></div>`;
 }
 
 function stageManager(){return has('leads.edit')&&['admin','gestor'].includes(member?.role)}
@@ -605,6 +712,9 @@ root.addEventListener('click',async e=>{const b=e.target.closest('[data-action],
  if(b.dataset.page){if(!visible(b.dataset.page))return;page=b.dataset.page;modal=null;if(page==='conversas'){const candidates=conversationCandidates();if(!candidates.some(x=>x.id===conversationLeadId))conversationLeadId=candidates[0]?.id||null;conversationHistoryStatus='loading';conversationHistory=[];}render();if(page==='conversas'&&conversationLeadId)await loadConversationHistory(conversationLeadId);return}
  const action=b.dataset.action,id=b.dataset.id;
  try{
+ if(action==='r23-toggle-demo'){if(!r23PreviewAllowed())throw Error('Prévia reservada à diretoria');r23Presentation=!r23Presentation;render();return}
+ if(action==='r23-scale-month'){r23TrendScale='month';render();return}
+ if(action==='r23-scale-week'){r23TrendScale='week';render();return}
   if(action==='r20r2-pan'){
    const board=root.querySelectorAll('#r20r2-kanban')[0];
    if(!board)return;
@@ -685,6 +795,7 @@ root.addEventListener('change',e=>{
  if(id==='r17-dashboard-owner'){dashboardFilters.owner=e.target.value;render();return}
  if(id==='r17-dashboard-source'){dashboardFilters.source=e.target.value;render();return}
  if(id==='r22-trend-months'){dashboardTrendMonths=e.target.value==='12'?12:6;render();return}
+ if(id==='r23-trend-weeks'){r23TrendWeeks=[4,8,12].includes(Number(e.target.value))?Number(e.target.value):8;render();return}
  if(id==='r22-trend-demo'){dashboardTrendIncludeDemo=!!e.target.checked;render();return}
  if(id==='r17-pipeline-owner'){pipelineFilters.owner=e.target.value;render();return}
  if(id==='r17-pipeline-priority'){pipelineFilters.priority=e.target.value;render();return}
