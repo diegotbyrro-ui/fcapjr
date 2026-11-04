@@ -282,7 +282,7 @@ function r22MonthKey(value){
  return y&&m?`${y}-${m}`:'';
 }
 function r22MonthlyTrend(rows,includeDemo=dashboardTrendIncludeDemo,months=dashboardTrendMonths){
- const n=months===12?12:6;
+ const n=Math.max(1,Math.min(12,Math.trunc(Number(months)||6)));
  const current=r22MonthKey(new Date());
  const [year,month]=(current||'2026-01').split('-').map(Number);
  const timeline=Array.from({length:n},(_,i)=>{
@@ -391,11 +391,11 @@ function dashboardTrendChart(selectedLeads){
  const totalLeads=values.reduce((s,m)=>s+m.leads,0);
  const totalMeetings=values.reduce((s,m)=>s+m.meetings,0);
  const last=values[values.length-1],prev=values[values.length-2];
- const leadChange=r23Delta(last.leads,prev.leads),meetingChange=r23Delta(last.meetings,prev.meetings);
+ const leadChange=r23Delta(last.leads,prev?.leads),meetingChange=r23Delta(last.meetings,prev?.meetings);
  const max=Math.max(1,...values.flatMap(m=>[m.leads,m.meetings]));
  const step=r22NiceStep(max/4),top=step*4;
  const width=1000,left=52,right=27,topY=34,height=223;
- const x=i=>left+i*(width-left-right)/(values.length-1);
+ const x=i=>values.length===1?(left+width-right)/2:left+i*(width-left-right)/(values.length-1);
  const y=v=>topY+height*(1-v/top);
  const fmt=n=>Number(n.toFixed(2));
  const path=metric=>values.map((m,i)=>`${i?'L':'M'} ${fmt(x(i))} ${fmt(y(m[metric]))}`).join(' ');
@@ -417,7 +417,7 @@ function dashboardTrendChart(selectedLeads){
  const note=noData?'<span class="r22-trend-empty">Sem movimentação neste intervalo. Os dados fictícios não são contabilizados por padrão.</span>':'';
  const periodLabel=weekly?'semanas':'meses';
  const interval=weekly?r23TrendWeeks:dashboardTrendMonths;
- const options=weekly?[[4,'Últimas 4 semanas'],[8,'Últimas 8 semanas'],[12,'Últimas 12 semanas']]:[[6,'Últimos 6 meses'],[12,'Últimos 12 meses']];
+ const options=weekly?[[4,'Últimas 4 semanas'],[8,'Últimas 8 semanas'],[12,'Últimas 12 semanas']]:Array.from({length:12},(_,i)=>[i+1,i===0?'Último 1 mês':'Últimos '+(i+1)+' meses']);
  const selector=`<select id="${weekly?'r23-trend-weeks':'r22-trend-months'}" aria-label="Intervalo do gráfico">${options.map(([n,label])=>`<option value="${n}" ${interval===n?'selected':''}>${label}</option>`).join('')}</select>`;
  const previewButton=r23PreviewAllowed()?`<button type="button" class="r23-presentation-button ${preview?'is-active':''}" data-action="r23-toggle-demo" aria-pressed="${preview}">${preview?'Encerrar apresentação':'Prévia para apresentação'}</button>`:'';
  return `<section class="panel r22-trend-panel r23-trend-panel ${preview?'r23-preview-active':''}" aria-label="Comparativo comercial ${weekly?'semanal':'mensal'}">
@@ -794,7 +794,7 @@ root.addEventListener('change',e=>{
  if(id==='r17-dashboard-period'){dashboardFilters.period=e.target.value;render();return}
  if(id==='r17-dashboard-owner'){dashboardFilters.owner=e.target.value;render();return}
  if(id==='r17-dashboard-source'){dashboardFilters.source=e.target.value;render();return}
- if(id==='r22-trend-months'){dashboardTrendMonths=e.target.value==='12'?12:6;render();return}
+ if(id==='r22-trend-months'){dashboardTrendMonths=Math.max(1,Math.min(12,Math.trunc(Number(e.target.value)||6)));render();return}
  if(id==='r23-trend-weeks'){r23TrendWeeks=[4,8,12].includes(Number(e.target.value))?Number(e.target.value):8;render();return}
  if(id==='r22-trend-demo'){dashboardTrendIncludeDemo=!!e.target.checked;render();return}
  if(id==='r17-pipeline-owner'){pipelineFilters.owner=e.target.value;render();return}
