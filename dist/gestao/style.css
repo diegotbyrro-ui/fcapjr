@@ -586,3 +586,105 @@ html,body{overflow-x:clip}
 
 .r23-presentation-note{border-radius:11px;background:color-mix(in srgb,var(--ap-blue) 9%,var(--ap-surface));border:1px solid color-mix(in srgb,var(--ap-blue) 22%,var(--ap-border));padding:11px 15px;color:var(--ap-text-soft);font-weight:700;font-size:11px;line-height:1.5}
 .r23-kpis-secondary{margin-top:0;margin-bottom:22px}
+
+/* FCAPJR_R26_HEADER_UNICO_START
+   Ajuste apenas visual: retirar duplicacao de titulos e banners superiores.
+   Acoes, filtros, alertas, modulos e o Kanban continuam ativos.
+   A classe page-* vem do menu atual, nao de qualquer dado do usuario.
+*/
+
+/* Dashboard, Pipeline e WhatsApp: conservar as acoes, retirar a segunda apresentacao da pagina. */
+.page-dashboard .r23-dashboard-shell .dashboard-heading > div:first-child,
+.page-pipeline > .pipeline-topbar > div:first-child,
+.page-whatsapp > .r17-wa-title > div:first-child {
+  display: none !important;
+}
+
+.page-dashboard .r23-dashboard-shell .dashboard-heading,
+.page-pipeline > .pipeline-topbar,
+.page-whatsapp > .r17-wa-title {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 0 !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.page-dashboard .r23-dashboard-shell .dashboard-heading .dash-actions,
+.page-pipeline > .pipeline-topbar > .flex,
+.page-whatsapp > .r17-wa-title > .r17-wa-stats {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.page-whatsapp .r17-wa-stats span {
+  padding: 7px 10px;
+}
+.page-whatsapp .r17-wa-stats b {
+  font-size: 15px;
+}
+
+/* Leads e Blog: manter todas as operacoes no topo, sem repetir titulos. */
+.page-leads > .panel:first-child > .flex.space > div:first-child,
+.page-artigos > .panel.flex.space:first-child > div:first-child {
+  display: none !important;
+}
+.page-leads > .panel:first-child > .flex.space {
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.page-artigos > .panel.flex.space:first-child {
+  display: flex !important;
+  justify-content: flex-end !important;
+  padding: 0 !important;
+  margin-bottom: 12px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Demais modulos: retirar apenas o titulo repetido, mantendo orientacoes e avisos. */
+.page-prospector > .panel:first-child > .flex.space > div:first-child > .eyebrow,
+.page-prospector > .panel:first-child > .flex.space > div:first-child > h2,
+.page-secretaria > .panel:first-child > .eyebrow,
+.page-secretaria > .panel:first-child > h2,
+.page-avisos > .panel:first-child > .flex.space > h2,
+.page-equipe > .permissions-intro > div:first-child > .eyebrow,
+.page-equipe > .permissions-intro > div:first-child > h2 {
+  display: none !important;
+}
+.page-avisos > .panel:first-child > .flex.space {
+  justify-content: flex-end;
+}
+.page-prospector > .panel:first-child > .flex.space > div:first-child > p,
+.page-secretaria > .panel:first-child > p,
+.page-equipe > .permissions-intro > div:first-child > p {
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  .page-dashboard .r23-dashboard-shell .dashboard-heading,
+  .page-pipeline > .pipeline-topbar,
+  .page-whatsapp > .r17-wa-title,
+  .page-artigos > .panel.flex.space:first-child {
+    justify-content: flex-start !important;
+  }
+  .page-dashboard .r23-dashboard-shell .dashboard-heading .dash-actions,
+  .page-pipeline > .pipeline-topbar > .flex,
+  .page-whatsapp > .r17-wa-title > .r17-wa-stats {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .page-leads > .panel:first-child > .flex.space {
+    justify-content: flex-start;
+  }
+}
+/* FCAPJR_R26_HEADER_UNICO_END */
