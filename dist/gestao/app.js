@@ -442,6 +442,27 @@ function dashboardTrendChart(selectedLeads){
  </section>`;
 }
 
+// FCAPJR_R27_ORIGENS_PREVIA_INICIO - 100% ilustrativo, sem gravacao no Supabase.
+const r27DemoOrigins=[
+ ['Instagram',5,38000,3],
+ ['Indicação',4,44000,4],
+ ['Site',4,36000,3],
+ ['WhatsApp',3,28000,2],
+ ['Prospecção ativa',2,19000,1],
+ ['Eventos / Parcerias',2,14000,2]
+];
+function r27PresentationSourcesHTML(){
+ const total=r27DemoOrigins.reduce((sum,row)=>sum+row[1],0);
+ return r27DemoOrigins.map(([origin,quantity,estimated,meetings])=>
+  dashBar(origin,quantity,total,`${money(estimated)} estimados · ${meetings} reuniões fictícias`)
+ ).join('');
+}
+// FCAPJR_R27_ORIGENS_PREVIA_FIM
+
+function r27PresentationBadge(){
+ return '<span class="r18-demo-badge">EXEMPLO FICTÍCIO · 20 oportunidades</span>';
+}
+
 function dashboard(){
  const selectedLeads=filteredDashboardLeads();
  const m=dashMetrics(selectedLeads),est=m.estimated,openAmount=est(m.opened),wonAmount=est(m.won);
@@ -463,7 +484,7 @@ function dashboard(){
  ];
  const stagesHTML=stages.map(s=>{const list=selectedLeads.filter(l=>l.stage_id===s.id);return dashBar(s.name,list.length,selectedLeads.length,`${money(est(list))} em oportunidades`)}).join('')||'<p class="empty">Etapas não carregadas.</p>';
  const bySource=new Map();selectedLeads.forEach(l=>{const key=String(l.source||'Não informada').trim()||'Não informada';bySource.set(key,(bySource.get(key)||0)+1)});
- const sourcesHTML=[...bySource.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([key,count])=>dashBar(key.replaceAll('_',' '),count,selectedLeads.length)).join('')||'<p class="empty">Ainda não há origens para analisar.</p>';
+ const sourcesHTML=preview?r27PresentationSourcesHTML():[...bySource.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([key,count])=>dashBar(key.replaceAll('_',' '),count,selectedLeads.length)).join('')||'<p class="empty">Ainda não há origens para analisar.</p>';
  const sellers=members.filter(x=>x.active&&['vendedor','gestor','admin'].includes(x.role));
  const teamHTML=sellers.map(x=>{const pool=selectedLeads.filter(l=>l.assigned_to===x.user_id);const won=pool.filter(l=>stage(l.stage_id).kind==='won');return `<div class="dash-team-row"><div><strong>${esc(x.full_name)}</strong><small>${esc(displayRole(x.role))}</small></div><div class="dash-team-stats"><b>${pool.length}</b><span>leads</span><b>${won.length}</b><span>ganhos</span></div></div>`}).join('')||'<p class="empty">Sem equipe cadastrada.</p>';
  const recent=selectedLeads.slice(0,6).map(l=>`<div class="statline"><span><b>${esc(l.company_name)}</b><small class="muted" style="display:block">${esc(stage(l.stage_id).name)} · ${date(l.created_at)}</small></span><button class="btn ghost" data-action="view-lead" data-id="${esc(l.id)}">Abrir</button></div>`).join('')||'<p class="empty">Nenhum lead recebido ainda.</p>';
@@ -476,14 +497,14 @@ function dashboard(){
    <label>Responsável<select id="r17-dashboard-owner">${r17SelectOptions([['unassigned','Sem responsável'],...members.filter(m=>m.active).map(m=>[m.user_id,m.full_name])],dashboardFilters.owner,'Todos os responsáveis')}</select></label>
    <label>Origem<select id="r17-dashboard-source">${r17SelectOptions([...new Set(leads.map(l=>String(l.source||'')))].filter(Boolean).sort().map(x=>[x,x.replaceAll('_',' ')]),dashboardFilters.source,'Todas as origens')}</select></label>
    <p class="muted">Os filtros se aplicam aos indicadores de leads e do funil; tarefas e reuniões seguem o acesso do seu perfil. A consulta atual carrega até 1.000 leads.</p>
- </div>${preview?'<p class="r23-presentation-note">PRÉVIA PARA APRESENTAÇÃO — os cartões coloridos e o gráfico abaixo são inteiramente simulados. Os outros blocos continuam mostrando os dados já autorizados do CRM.</p>':leads.some(isDemoLead)?'<p class="r17-wa-demo-warning">ATENÇÃO: alguns indicadores do CRM incluem clientes fictícios [DEMO]. Leads do mês, reuniões do mês e gráfico excluem DEMO por padrão.</p>':''}<div class="dash-kpis r23-kpis">${r23KpiCards(indicators.slice(0,4))}</div>
+ </div>${preview?'<p class="r23-presentation-note">PRÉVIA PARA APRESENTAÇÃO — cartões superiores, gráfico de evolução e quadro de origens usam dados fictícios. Os demais blocos exibem os dados autorizados do CRM.</p>':leads.some(isDemoLead)?'<p class="r17-wa-demo-warning">ATENÇÃO: alguns indicadores do CRM incluem clientes fictícios [DEMO]. Leads do mês, reuniões do mês e gráfico excluem DEMO por padrão.</p>':''}<div class="dash-kpis r23-kpis">${r23KpiCards(indicators.slice(0,4))}</div>
  ${dashboardTrendChart(selectedLeads)}
  <div class="dash-kpis r23-kpis r23-kpis-secondary">${r23KpiCards(indicators.slice(4))}</div>
- <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Distribuição do funil</h2><span class="tag">${selectedLeads.length} registros</span></div>${stagesHTML}</section><section class="panel"><h2>Origem das oportunidades</h2>${sourcesHTML}</section></div>
+ <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Distribuição do funil</h2><span class="tag">${selectedLeads.length} registros</span></div>${stagesHTML}</section><section class="panel"><h2>Origem das oportunidades</h2>${preview?r27PresentationBadge():""}${sourcesHTML}</section></div>
  <div class="dash-top-grid"><section class="panel"><div class="section-heading"><h2>Produtividade da equipe</h2><span class="tag">${sellers.length} integrantes ativos</span></div>${teamHTML}</section><section class="panel"><h2>Atividade registrada</h2><div class="dash-activity-grid"><div><b>${m.completed.length}</b><small>Tarefas concluídas</small></div><div><b>${m.pending.length}</b><small>Tarefas pendentes</small></div><div><b>${meetings.filter(x=>x.status==='confirmada').length}</b><small>Reuniões confirmadas</small></div><div><b>${interactions.length}</b><small>Interações carregadas</small></div><div><b>${analysisCount}</b><small>Análises IA nos últimos 30 dias</small></div><div><b>${m.unassigned.length}</b><small>Leads abertos sem responsável</small></div></div></section></div>
  <div class="dash-top-grid"><section class="panel"><h2>Próximas reuniões</h2>${items}</section><section class="panel"><h2>Prazos que exigem atenção</h2>${overdue}</section></div>
  <section class="panel"><div class="section-heading"><h2>Leads recentes</h2><span class="tag">Últimos registros</span></div>${recent}</section>
- <p class="dash-disclaimer">${preview?'Os oito cartões e o gráfico desta prévia são SIMULADOS, apenas para apresentação. Os blocos inferiores continuam mostrando os dados autorizados do CRM. ':''}Indicadores calculados a partir dos dados visíveis ao seu perfil e dos limites de consulta do CRM (até 1.000 leads, 500 tarefas, 500 reuniões, 750 interações e 250 análises). Valores financeiros são estimativas cadastradas, não faturamento real. ${!selectedLeads.length?'Ainda não há dados comerciais suficientes para análise de conversão.':''}</p></div>`;
+ <p class="dash-disclaimer">${preview?'Os oito cartões, o gráfico de evolução e as origens desta prévia são FICTÍCIOS e exclusivos da apresentação. Os demais blocos mostram dados autorizados do CRM. ':''}Indicadores calculados a partir dos dados visíveis ao seu perfil e dos limites de consulta do CRM (até 1.000 leads, 500 tarefas, 500 reuniões, 750 interações e 250 análises). Valores financeiros são estimativas cadastradas, não faturamento real. ${!selectedLeads.length?'Ainda não há dados comerciais suficientes para análise de conversão.':''}</p></div>`;
 }
 
 function stageManager(){return has('leads.edit')&&['admin','gestor'].includes(member?.role)}
