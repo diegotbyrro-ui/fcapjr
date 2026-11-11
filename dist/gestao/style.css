@@ -688,3 +688,13 @@ html,body{overflow-x:clip}
   }
 }
 /* FCAPJR_R26_HEADER_UNICO_END */
+
+
+/* FCAP JR R29 — filtro compacto no cabeçalho de Distribuição do funil */
+.r23-dashboard-shell .r17-dashboard-filters{grid-template-columns:repeat(2,minmax(160px,1fr))}
+.r29-funnel-tools{display:flex;align-items:center;justify-content:flex-end;gap:11px;flex-wrap:wrap;margin-left:auto}
+.r29-origin-label{display:flex;align-items:center;gap:7px;margin:0;color:var(--ap-text-soft,#4b627b);font-size:12px;font-weight:650;white-space:nowrap}
+.r29-origin-label select{min-width:172px;max-width:218px;min-height:35px;padding:6px 9px;border:1px solid var(--ap-border,#d4dfea);background:var(--ap-surface,#fff);border-radius:9px;color:var(--ap-text,#172b43);font-size:12px;box-shadow:none}
+.r29-origin-label select:focus-visible{outline:2px solid var(--ap-blue,#1263c1);outline-offset:2px}
+.r29-funnel-tools .tag{white-space:nowrap}
+@media(max-width:770px){.r23-dashboard-shell .r17-dashboard-filters{grid-template-columns:1fr}.r29-funnel-tools{justify-content:flex-start;margin-left:0;width:100%}.r29-origin-label select{min-width:155px;max-width:190px}}
