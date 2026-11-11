@@ -25,7 +25,7 @@ async function refreshDirectorNameField(user){
  directorNameField.hidden=true;directorNameInput.required=false;directorNameInput.value='';
  if(!auth||!user?.id||String(user.email||'').toLowerCase()!==directorEmailR32)return;
  const {data,error}=await auth.from('fcap_members').select('role,email,active').eq('user_id',user.id).maybeSingle();
- if(!error&&data?.active===true&&data.role==='diretor'&&String(data.email||'').toLowerCase()===directorEmailR32){directorNameField.hidden=false;directorNameInput.required=true}
+ if(!error&&data?.active===true&&data.role==='diretor'&&String(data.email||'').toLowerCase()===directorEmailR32){directorNameField.hidden=false;directorNameInput.required=true;if(needsPassword){window.location.replace('./diretoria.html?mode=complete');return}}
 }
 const tokenParameters=new URLSearchParams(window.location.hash.replace(/^#/,''));
 const authMode=new URLSearchParams(window.location.search).get('mode');

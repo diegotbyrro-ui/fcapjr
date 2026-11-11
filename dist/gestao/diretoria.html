@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#101c32">
+  <title>Diretoria | FCAP Jr.</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon-official.svg">
+  <link rel="stylesheet" href="./diretoria.css?v=R33-20261111">
+</head>
+<body>
+  <div class="layout">
+    <aside class="story">
+      <div class="brand">
+        <div class="brand-icon"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."></div>
+        <div><strong>FCAP Jr.</strong><small>CENTRAL DE GESTÃO</small></div>
+      </div>
+      <div class="story-body">
+        <div class="eyebrow"><span class="status-dot"></span> ACESSO INSTITUCIONAL</div>
+        <h1>Uma diretoria.<br><em>Novos ciclos.</em></h1>
+        <p>Seu espaço para assumir a gestão, configurar seus dados e preparar a transição do cargo de forma segura.</p>
+        <div class="story-note"><span class="note-index">01</span><span>E-mail permanente da FCAP Jr.</span></div>
+        <div class="story-note"><span class="note-index">02</span><span>Identidade de quem ocupa o cargo</span></div>
+        <div class="story-note"><span class="note-index">03</span><span>Passagem de gestão sem criar outra diretoria</span></div>
+      </div>
+      <footer>FCAP Jr. <span>·</span> Portal exclusivo da Diretoria</footer>
+    </aside>
+
+    <main class="main">
+      <header class="top"><a class="back" href="./login.html">← Voltar ao acesso</a><span class="top-id">DIRETORIA <span class="top-version">R33</span></span></header>
+      <section class="sheet" aria-labelledby="heading">
+        <div class="step-label">GESTÃO INSTITUCIONAL <span class="step-dash"></span> UM ÚNICO CARGO</div>
+        <h2 id="heading">Seu acesso à<br><span>Diretoria FCAP Jr.</span></h2>
+        <p class="intro">O e-mail pertence à instituição. O nome, o telefone e a senha pertencem a quem está ocupando o cargo neste ciclo.</p>
+        <div class="mail-box"><span class="mail-icon" aria-hidden="true">✉</span><div><small>E-MAIL INSTITUCIONAL FIXO</small><strong id="fixed-email">diretoria.marketing@fcapjr.com.br</strong></div><span class="locked" title="E-mail institucional protegido">FIXO</span></div>
+        <div class="message" id="message" aria-live="polite" role="status" hidden></div>
+
+        <section id="access-section">
+          <div class="section-heading"><span class="number">01</span><h3>Confirmar acesso</h3></div>
+          <p class="explain">Para o primeiro cadastro ou troca anual, enviaremos um link de verificação para o e-mail da Diretoria. O Administrador precisa autorizar a conta institucional uma única vez.</p>
+          <button class="primary" id="request-link" type="button" disabled>Enviar link de acesso seguro <span aria-hidden="true">↗</span></button>
+          <p class="fine">O envio do link não cria usuários nem outros cargos. Apenas a pessoa que consegue acessar o e-mail institucional poderá continuar.</p>
+        </section>
+
+        <form id="profile-form" class="profile-form" hidden autocomplete="on">
+          <div class="section-heading"><span class="number">02</span><h3>Dados do Diretor</h3></div>
+          <p class="explain">Preencha os dados do ocupante atual. Na próxima gestão, o sucessor poderá substituí-los, mantendo a mesma conta institucional.</p>
+          <label for="full-name">Nome completo</label>
+          <input id="full-name" name="full_name" type="text" autocomplete="name" minlength="2" maxlength="120" placeholder="Nome e sobrenome" required>
+          <label for="phone">Telefone de contato</label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel-national" inputmode="tel" placeholder="(82) 99999-9999" maxlength="25" required>
+          <div class="separator"></div>
+          <label for="new-password">Nova senha</label>
+          <input id="new-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Pelo menos 12 caracteres" required>
+          <label for="confirm-password">Confirme a nova senha</label>
+          <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Digite a senha novamente" required>
+          <p class="fine">Por segurança, a senha não é exibida nem compartilhada com o Administrador.</p>
+          <button class="primary" id="save-profile" type="submit">Salvar dados e definir senha <span aria-hidden="true">↗</span></button>
+          <div class="handover" id="handover"><div><strong>Passagem do bastão</strong><p>Quando a gestão mudar, o novo Diretor deverá assumir o e-mail institucional. Envie um link para que ele substitua nome, telefone e senha.</p></div><button id="handover-link" type="button" class="outline">Enviar link para nova gestão</button></div>
+        </form>
+
+        <section id="success-section" hidden class="success-section"><div class="success-symbol">✓</div><h3>Cadastro atualizado</h3><p>Seu nome, telefone e nova senha foram registrados. Para entrar no CRM, faça login com o e-mail institucional e a senha que acabou de criar.</p><a class="primary anchor-primary" href="./login.html">Ir para o CRM <span>↗</span></a></section>
+        <footer class="card-footer">Acesso restrito à Diretoria FCAP Jr. <a href="./login.html">Entrar no CRM</a></footer>
+      </section>
+    </main>
+  </div>
+  <script src="./fcap-config.js?v=R18R2"></script>
+  <script type="module" src="./diretoria.js?v=R33-20261111"></script>
+</body>
+</html>
