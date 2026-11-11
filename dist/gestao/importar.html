@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
+<title>Importar dados de outro CRM | FCAP Jr. R35</title>
+<link rel="icon" href="../assets/favicon-official.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./importar.css?v=R35-20261111">
+</head>
+<body>
+<div class="imp-app">
+<aside class="imp-sidebar"><a class="imp-brand" href="./#pipeline"><img src="../assets/logo-fcap-clean.svg" alt="FCAP Jr."><span><b>FCAP JR.</b><small>Central de Gestão</small></span></a><div class="imp-sidegroup">FERRAMENTAS</div><a class="imp-side-link" href="./#pipeline">← Voltar ao pipeline</a><a class="imp-side-link is-active" href="./importar.html">↑ Importar CRM</a><p class="imp-side-help">Os arquivos são lidos no navegador. O envio de leads só ocorre após revisão e confirmação.</p></aside>
+<main class="imp-main">
+<header class="imp-top"><div><span class="imp-eyebrow">PIPELINE / MIGRAÇÃO DE DADOS</span><h1>Importar dados de outro CRM</h1><p>Traga leads e oportunidades para o pipeline da FCAP Jr., preservando as etapas e os dados relevantes.</p></div><span id="identity" class="imp-identity">Verificando acesso…</span></header>
+<div class="imp-content"><div class="imp-steps" id="steps" data-step="1"><span><b>1</b> Arquivo</span><span><b>2</b> Correspondências</span><span><b>3</b> Conferência</span></div>
+<div id="status" class="imp-status" data-type="info" role="status" aria-live="polite">Autenticando…</div>
+<section class="imp-card" id="file-card"><div class="imp-card-head"><div><span class="imp-eyebrow">ETAPA 1</span><h2>Selecione a exportação</h2><p>CSV, TXT, TSV, XLS, XLSX, XLSB, XLSM, ODS, NUMBERS, JSON, XML, vCard e ZIP.</p></div><span class="imp-roundicon">↑</span></div>
+<div class="imp-upload"><input id="file" type="file" accept=".csv,.tsv,.txt,.xls,.xlsx,.xlsm,.xlsb,.ods,.fods,.numbers,.json,.xml,.vcf,.vcard,.zip,.html,.htm,.dbf,.dif,.slk,.prn" hidden><button id="choose" class="imp-primary" type="button" disabled>Escolher arquivo no computador</button><p>Arquivo até 20 MB (ZIP até 40 MB). Limite de 10.000 registros por conjunto.</p></div>
+<label class="imp-small">Codificação de texto (CSV, TXT, JSON etc.)<select id="encoding"><option value="auto">Detectar automaticamente (UTF-8 / Windows-1252)</option><option value="utf-8">UTF-8</option><option value="windows-1252">Windows-1252 / Excel antigo</option><option value="iso-8859-1">ISO-8859-1</option><option value="utf-16le">UTF-16 LE</option></select></label>
+<p class="imp-footnote">Exportações protegidas por senha e arquivos de banco proprietários (.bak/.db) precisam ser exportados pelo CRM de origem. Anexos, atividades e relacionamentos não são transferidos automaticamente nesta versão.</p></section>
+<section id="dataset-card" class="imp-card" hidden><div class="imp-card-head"><div><span class="imp-eyebrow">CONJUNTO DE DADOS</span><h2>Escolha a tabela correta</h2><p>Um ZIP ou Excel pode ter vários módulos e abas. Escolha a tabela com leads/negócios.</p></div><span id="dataset-label" class="imp-tag"></span></div><label>Arquivo ou aba<select id="dataset"></select></label></section>
+<section id="mapping-card" class="imp-card" hidden><div class="imp-card-head"><div><span class="imp-eyebrow">ETAPA 2</span><h2>Relacione as colunas</h2><p>Identificamos os nomes mais conhecidos. Corrija cada campo antes de importar; nenhum mapeamento é obrigatório exceto empresa/nome.</p></div></div><div id="fields" class="imp-field-grid"></div><hr>
+<h3>Posicionar no funil da FCAP Jr.</h3><p class="imp-muted">Cada etapa do arquivo antigo precisa ser associada a uma etapa existente. Não criaremos ou renomearemos colunas.</p><div id="stage-map" class="imp-pairs"></div><label class="imp-small">Etapa padrão para registros sem etapa<select id="default-stage"></select></label>
+<h3>Responsáveis</h3><p class="imp-muted">Associe os responsáveis antigos aos usuários autorizados da FCAP Jr. Se não houver correspondência, deixe sem responsável.</p><div id="owner-map" class="imp-pairs"></div>
+<label class="imp-check"><input id="keep-extra" type="checkbox" checked><span>Preservar campos adicionais como texto nas observações (exceto possíveis senhas/tokens)</span></label></section>
+<section id="review-card" class="imp-card" hidden><div class="imp-card-head"><div><span class="imp-eyebrow">ETAPA 3</span><h2>Confira os dados antes de gravar</h2><p id="preview-meta">Aguardando mapeamentos…</p></div></div>
+<div class="imp-table-wrap"><table><thead><tr><th>Empresa</th><th>Contato</th><th>E-mail</th><th>Telefone</th><th>Etapa FCAP Jr.</th><th>Valor estimado</th></tr></thead><tbody id="preview-table"></tbody></table></div>
+<div id="errors"></div><label class="imp-check"><input id="skip-dupes" type="checkbox" checked><span>Ignorar registros duplicados no arquivo ou já existentes no CRM (recomendado)</span></label>
+<div class="imp-scan"><button id="scan-db" class="imp-secondary" type="button">Conferir duplicados no CRM</button><span id="db-checked" data-ok="false">Base ainda não conferida</span></div>
+<div class="imp-confirm"><label class="imp-check"><input id="legal-confirm" type="checkbox"><span>Conferi colunas, etapas, valores e responsáveis e tenho autorização para transferir esses dados à FCAP Jr.</span></label><button id="import-confirm" class="imp-primary" type="button" disabled>Importar <span id="confirm-count">0</span> leads</button></div>
+<p class="imp-footnote">Operação somente de inclusão: não altera nem apaga leads existentes. Processa lotes de 100; se houver erro, os lotes anteriores podem permanecer gravados. Uma nova importação precisa de conferência de duplicados.</p></section>
+<section id="result" class="imp-card" hidden></section>
+<footer class="imp-bottom">FCAP Jr. • Importador R35 • Dados lidos localmente, envio somente após confirmação • <a href="./#pipeline">Pipeline comercial</a></footer>
+</div></main></div>
+<script src="./fcap-config.js?v=R18R2"></script><script type="module" src="./importar.js?v=R35-20261111"></script>
+</body></html>
