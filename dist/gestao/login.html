@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0d1930">
   <title>Central de Gestão | FCAP Jr.</title>
   <link rel="icon" href="../assets/favicon-official.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="login.css?v=R30-20261111">
+  <link rel="stylesheet" href="login.css?v=R32-20261111-DIRETOR-UNICO">
 </head>
 <body>
   <div class="layout">
@@ -64,6 +64,7 @@
         <form id="set-password-form" autocomplete="new-password" hidden>
           <h2 class="password-flow-heading">Escolha sua senha</h2>
           <p class="password-flow-note">Use ao menos 12 caracteres. Esta senha nao e compartilhada com a FCAP Jr. ou com o administrador.</p>
+          <div class="field" id="director-name-field" hidden><label for="director-full-name">Nome completo do Diretor</label><input id="director-full-name" name="director_full_name" type="text" autocomplete="name" minlength="2" maxlength="120" placeholder="Seu nome completo"><p class="password-flow-note">Este nome será mostrado no perfil da Diretoria. Digite o nome do atual ocupante do cargo.</p></div>
           <div class="field"><label for="new-password">Nova senha</label><input id="new-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>
           <div class="field"><label for="confirm-password">Confirme a nova senha</label><input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>
           <button type="submit" id="set-password-submit" class="submit">Salvar senha com seguranca</button>
@@ -75,6 +76,6 @@
     </main>
   </div>
   <script src="./fcap-config.js?v=R18R2"></script>
-  <script type="module" src="login.js?v=R30-20261111"></script>
+  <script type="module" src="login.js?v=R32-20261111-DIRETOR-UNICO"></script>
 </body>
 </html>

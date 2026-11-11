@@ -17,6 +17,16 @@ const recoveryReturn=document.querySelector('#password-recovery-return');
 const requestPasswordButton=document.querySelector('#request-password-link');
 const recoverySubmit=document.querySelector('#recovery-submit');
 const setPasswordSubmit=document.querySelector('#set-password-submit');
+// FCAPJR_R32_NOME_DIRETOR: apenas Diretor autenticado ve e altera o nome no CRM.
+const directorNameField=document.querySelector('#director-name-field');
+const directorNameInput=document.querySelector('#director-full-name');
+const directorEmailR32='diretoria.marketing@fcapjr.com.br';
+async function refreshDirectorNameField(user){
+ directorNameField.hidden=true;directorNameInput.required=false;directorNameInput.value='';
+ if(!auth||!user?.id||String(user.email||'').toLowerCase()!==directorEmailR32)return;
+ const {data,error}=await auth.from('fcap_members').select('role,email,active').eq('user_id',user.id).maybeSingle();
+ if(!error&&data?.active===true&&data.role==='diretor'&&String(data.email||'').toLowerCase()===directorEmailR32){directorNameField.hidden=false;directorNameInput.required=true}
+}
 const tokenParameters=new URLSearchParams(window.location.hash.replace(/^#/,''));
 const authMode=new URLSearchParams(window.location.search).get('mode');
 let needsPassword=authMode==='reset'||['recovery','invite'].includes(tokenParameters.get('type'));
@@ -63,14 +73,21 @@ setPasswordForm.addEventListener('submit',async e=>{
  try{
   const {data:userData,error:sessionError}=await auth.auth.getUser();
   if(sessionError||!userData?.user)throw Error('Sessao de verificacao ausente. Solicite novo link.');
+  const {data:memberData,error:memberError}=await auth.from('fcap_members').select('role,email,active').eq('user_id',userData.user.id).maybeSingle();
+  if(memberError||!memberData?.active)throw Error('Conta nao autorizada no CRM.');
+  const isDirector=memberData.role==='diretor'&&String(memberData.email||'').toLowerCase()===directorEmailR32&&String(userData.user.email||'').toLowerCase()===directorEmailR32;
+  const name=String(payload.get('director_full_name')||'').trim();
+  if(isDirector&&(name.length<2||name.length>120)){notice('Informe o nome completo do Diretor com 2 a 120 caracteres.');return}
   const {error}=await auth.auth.updateUser({password:next});
   if(error)throw error;
+  let directorNameSaved=true;
+  if(isDirector){try{const result=await auth.functions.invoke('fcap-members',{body:{action:'update_self_name',full_name:name}});directorNameSaved=!result.error&&result.data?.ok===true}catch{directorNameSaved=false}}
   // Revogar refresh tokens de outras sessoes da mesma conta, importante na troca anual.
   const out=await auth.auth.signOut({scope:'global'});
   setPasswordForm.reset();needsPassword=false;
   window.history.replaceState(null,'',window.location.pathname);
   showAuthMode('login');loginButtonReady();
-  notice(out?.error?'Senha alterada. Por seguranca, encerre quaisquer outras sessoes ativas e entre novamente.':'Senha definida. Entre com o e-mail corporativo e sua nova senha.',true);
+  notice(!directorNameSaved?'Senha alterada, mas nao foi possivel atualizar o nome no CRM. Solicite a correcao ao Administrador.':out?.error?'Senha alterada. Por seguranca, encerre quaisquer outras sessoes ativas e entre novamente.':'Senha e perfil definidos. Entre com o e-mail corporativo e sua nova senha.',true);
  }catch(err){notice('Nao foi possivel concluir a alteracao. Se o link tiver expirado, solicite outro.');}
  finally{setPasswordSubmit.disabled=false;}
 });
@@ -83,12 +100,12 @@ async function initLogin(){
     const lib=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/+esm');
     auth=lib.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true}});
     auth.auth.onAuthStateChange((event,s)=>{
-      if(event==='PASSWORD_RECOVERY'){needsPassword=true;showAuthMode('set');notice('Link validado. Agora escolha sua nova senha.',true)}
-      else if(event==='SIGNED_IN'&&needsPassword&&s){showAuthMode('set');}
+      if(event==='PASSWORD_RECOVERY'){needsPassword=true;showAuthMode('set');refreshDirectorNameField(s?.user).catch(()=>{});notice('Link validado. Agora escolha sua nova senha.',true)}
+      else if(event==='SIGNED_IN'&&needsPassword&&s){showAuthMode('set');refreshDirectorNameField(s.user).catch(()=>{});}
     });
     const {data:{user},error}=await auth.auth.getUser();
     if(needsPassword){
-      if(!error&&user){showAuthMode('set');notice('Sua identidade foi confirmada. Defina sua senha.',true)}
+      if(!error&&user){await refreshDirectorNameField(user);showAuthMode('set');notice('Sua identidade foi confirmada. Defina sua senha.',true)}
       else{showAuthMode('recovery');notice('O link pode estar expirado. Solicite novo e-mail de verificacao.',true)}
       loginButtonReady();return;
     }

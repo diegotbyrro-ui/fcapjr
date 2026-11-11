@@ -1,4 +1,6 @@
 /* FCAP Jr. | R14 login refinado. Sem bibliotecas ou fontes externas. */
+/* R32: ocultar nome do Diretor ate autenticar perfil institucional. */
+#director-name-field[hidden]{display:none!important}
 :root{font-family:Inter,"Segoe UI Variable","Segoe UI",Arial,sans-serif;font-synthesis:none;text-rendering:optimizeLegibility;color:#14233b;background:#f7f8fb;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box}
 html{min-width:320px}
