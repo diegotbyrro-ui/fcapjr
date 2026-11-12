@@ -1,0 +1,15 @@
+/* FCAP Jr. R36: ajustes no portal de cadastro direto e autogestao */
+#loading[hidden],#access[hidden],#activation-form[hidden],#profile-form[hidden],#success[hidden],#message[hidden]{display:none!important}
+.panel-line{display:flex;align-items:center;gap:12px;padding:19px 0;color:#697b8f;font-size:13px}
+.pulse{width:12px;height:12px;border-radius:50%;background:#318b88;box-shadow:0 0 0 5px #e1f2ef}
+.direct-link{display:block;text-align:center;text-decoration:none;margin-top:25px}
+.profile-form input[autocomplete="new-password"]{letter-spacing:.02em}
+.story h1{font-weight:700}.story h1 em{font-weight:600}
+#success .primary{text-decoration:none}
+@media(max-width:600px){.sheet{padding-bottom:22px}.panel-line{padding:12px 0}}
+#tools[hidden],#link-panel[hidden]{display:none!important}
+.field-label{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;color:#60758b;margin-bottom:8px}
+.link-field{width:100%;min-height:48px;border:1px solid #b7d4d0;background:#fff;color:#203d51;border-radius:10px;font:500 12px/1.5 monospace;padding:10px}
+.link-field:focus{outline:2px solid #499e98;outline-offset:2px}
+
+#claim-invite[hidden]{display:none!important}
